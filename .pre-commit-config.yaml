@@ -1,0 +1,75 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+        args: ['--unsafe']
+      - id: check-added-large-files
+        args: ['--maxkb=1000']
+      - id: check-json
+      - id: check-toml
+      - id: check-merge-conflict
+      - id: check-case-conflict
+      - id: detect-private-key
+      - id: mixed-line-ending
+        args: ['--fix=lf']
+
+  - repo: https://github.com/psf/black
+    rev: 24.1.1
+    hooks:
+      - id: black
+        language_version: python3.10
+        args: ['--line-length=100']
+        files: ^backend/
+
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: v0.2.1
+    hooks:
+      - id: ruff
+        args: ['--fix', '--exit-non-zero-on-fix']
+        files: ^backend/
+
+  - repo: https://github.com/pycqa/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        args: ['--profile', 'black', '--line-length', '100']
+        files: ^backend/
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.8.0
+    hooks:
+      - id: mypy
+        additional_dependencies: [types-all]
+        files: ^backend/
+        args: ['--ignore-missing-imports']
+
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.7.6
+    hooks:
+      - id: bandit
+        args: ['-ll', '--skip', 'B101,B601']
+        files: ^backend/
+
+  - repo: https://github.com/commitizen-tools/commitizen
+    rev: v3.14.1
+    hooks:
+      - id: commitizen
+        stages: [commit-msg]
+
+  - repo: local
+    hooks:
+      - id: check-env-files
+        name: Check for .env files
+        entry: bash -c 'if ls .env* 2>/dev/null | grep -v .env.example; then echo "Error: .env files should not be committed!"; exit 1; fi'
+        language: system
+        pass_filenames: false
+
+      - id: pytest-check
+        name: pytest-check
+        entry: bash -c 'cd backend && pytest tests/ -x --tb=short'
+        language: system
+        pass_filenames: false
+        stages: [push]
