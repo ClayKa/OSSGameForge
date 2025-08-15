@@ -19,7 +19,10 @@ from sqlalchemy.pool import StaticPool
 # Import app dependencies
 from backend.app.main import app
 from backend.app.database import Base, get_db
-from backend.app.config import settings
+from backend.app.config import Settings
+
+# Create test settings instance
+settings = Settings()
 
 # Test database URL (in-memory SQLite for speed)
 TEST_DATABASE_URL = "sqlite:///:memory:"

@@ -27,12 +27,12 @@ Our focus is unwavering. This disciplined focus is our greatest asset.
     *   The RAG-powered intelligent NPC system.
 
 ---
-
+Every time finish a Week or a Task, add a ✅ after them, such as ### "**Task 1.1 (Corrected): Project Init, Version Control & CI** ✅".
 ## **Week 1: Foundation & Contracts (Focus: De-risk & Unblock)**
 
 **Goal of the Week:** To establish a rock-solid, simplified foundation. By the end of this week, the CI/CD will be green, and the frontend team will be completely unblocked by a reliable mock API, allowing for maximum parallel development.
 
-### **Task 1.1 (Corrected): Project Init, Version Control & CI**
+### **Task 1.1 (Corrected): Project Init, Version Control & CI** ✅
 *   **[Priority]** [MUST]
 *   **[Suggested Roles]** DevOps (1)
 *   **TODO (Task List):**

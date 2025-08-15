@@ -94,7 +94,7 @@ show_error_codes = true
 show_error_context = true
 
 [tool.pytest.ini_options]
-minversion = "8.0"
+minversion = "7.0"
 addopts = [
     "-ra",
     "--strict-markers",
