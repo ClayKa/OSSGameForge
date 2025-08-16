@@ -167,4 +167,4 @@ dev = [
 ]
 
 [pytest]
-pythonpath = .
+pythonpath = "."
