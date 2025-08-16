@@ -96,8 +96,7 @@ jobs:
           MOCK_MODE: true
           USE_LOCAL_MODEL: false
         run: |
-          PYTHONPATH=backend pytest backend/tests \
-            --cov=backend \
+          pytest --cov=backend \
             --cov-report=xml \
             --cov-report=term-missing \
             --junit-xml=pytest-report.xml \
