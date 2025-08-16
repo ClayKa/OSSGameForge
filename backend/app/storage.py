@@ -8,6 +8,7 @@ object storage with proper error handling and logging.
 import io
 import logging
 import os
+from datetime import timedelta
 
 from minio import Minio
 from minio.error import S3Error
@@ -165,7 +166,7 @@ def get_file_url(bucket_name: str, object_name: str, expires_in: int = 3600) -> 
     try:
         client = get_minio_client()
         url = client.presigned_get_object(
-            bucket_name=bucket_name, object_name=object_name, expires=expires_in
+            bucket_name=bucket_name, object_name=object_name, expires=timedelta(seconds=expires_in)
         )
         return url
 

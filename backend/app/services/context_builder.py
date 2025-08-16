@@ -25,6 +25,7 @@ class ContextBuilder:
         assets: list[dict[str, Any]] | None = None,
         style: str | None = None,
         additional_context: dict[str, Any] | None = None,
+        constraints: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         """
         Build a structured prompt for scene generation
@@ -40,7 +41,7 @@ class ContextBuilder:
             A structured prompt dictionary ready for inference
         """
         # Build base context
-        context = {
+        context: dict[str, Any] = {
             "user_prompt": user_prompt,
             "project_id": project_id,
             "style": style or "platformer",
@@ -51,6 +52,10 @@ class ContextBuilder:
         if assets:
             context["assets"] = self._process_assets(assets)
             context["asset_count"] = len(assets)
+
+        # Add constraints if provided
+        if constraints:
+            context["constraints"] = constraints
 
         # Add additional context
         if additional_context:

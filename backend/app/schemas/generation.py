@@ -95,11 +95,15 @@ class GenerationRequest(BaseModel):
     project_id: str
     assets: list[str] | None = []
     style: GameStyle | None = None
+    user_id: str | None = None
+    constraints: dict[str, Any] | None = None
+    model_version: str | None = None
 
 
 class GenerationResponse(BaseModel):
     """Response for scene generation"""
 
     scene_id: str
-    scene: Scene
+    scene: dict[str, Any]  # Changed from Scene to dict to match actual usage
     generation_time: float = Field(..., description="Generation time in seconds")
+    metadata: dict[str, Any] | None = None

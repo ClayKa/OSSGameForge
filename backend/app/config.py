@@ -17,8 +17,8 @@ class Settings(BaseSettings):
     debug: bool = False
     # API
     api_prefix: str = "/api"
-    mock_mode: bool = Field(default=False, env="MOCK_MODE")
-    use_local_model: bool = Field(default=False, env="USE_LOCAL_MODEL")
+    mock_mode: bool = Field(default=False)
+    use_local_model: bool = Field(default=False)
     # Database
     database_url: str = "postgresql://user:password@postgres:5432/ossgameforge"
     # MinIO/S3

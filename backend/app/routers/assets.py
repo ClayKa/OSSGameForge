@@ -95,7 +95,8 @@ async def upload_asset(
     if settings.mock_mode:
         # Create mock response
         asset_id = str(uuid4())
-        logger.info(f"Mock mode: simulating asset upload for {file.filename}")
+        filename = file.filename or "unknown_file"
+        logger.info(f"Mock mode: simulating asset upload for {filename}")
         return {
             "asset_id": asset_id,
             "status": "processing",
@@ -103,18 +104,21 @@ async def upload_asset(
         }
 
     try:
+        # Ensure filename is not None
+        filename = file.filename or "unknown_file"
+        
         # Create initial database record
         new_asset = asset_service.create_initial_asset_record(
             db=db,
             project_id=project_id,
-            filename=file.filename,
+            filename=filename,
             content_type=content_type,
             file_size=file_size,
         )
 
         # Process and store the file (includes EXIF stripping for images)
         await asset_service.process_and_store_file(
-            db=db, asset=new_asset, file_data=file_content, original_filename=file.filename
+            db=db, asset=new_asset, file_data=file_content, original_filename=filename
         )
 
         # Add background task for metadata extraction

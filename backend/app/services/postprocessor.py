@@ -194,13 +194,13 @@ class Postprocessor:
     def _get_default_size(self, entity_type: str) -> dict[str, float]:
         """Get default size for entity type"""
         defaults = {
-            "player": {"width": 32, "height": 48},
-            "enemy": {"width": 32, "height": 32},
-            "platform": {"width": 100, "height": 20},
-            "item": {"width": 16, "height": 16},
-            "background": {"width": 800, "height": 600},
+            "player": {"width": 32.0, "height": 48.0},
+            "enemy": {"width": 32.0, "height": 32.0},
+            "platform": {"width": 100.0, "height": 20.0},
+            "item": {"width": 16.0, "height": 16.0},
+            "background": {"width": 800.0, "height": 600.0},
         }
-        return defaults.get(entity_type, {"width": 32, "height": 32})
+        return defaults.get(entity_type, {"width": 32.0, "height": 32.0})
 
     def _apply_default_properties(
         self, entity_type: str, properties: dict[str, Any]

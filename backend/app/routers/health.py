@@ -24,7 +24,7 @@ async def check_health(db: Session = Depends(get_db)):
     Returns the status of the application and its dependencies.
     Used by load balancers and monitoring systems.
     """
-    health_status = {
+    health_status: dict[str, Any] = {
         "status": "healthy",
         "version": settings.app_version,
         "environment": "development" if settings.debug else "production",

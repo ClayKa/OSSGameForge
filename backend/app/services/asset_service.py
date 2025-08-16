@@ -21,7 +21,7 @@ from sqlalchemy.orm import Session
 
 from ..database import SessionLocal
 from ..models import Asset
-from ..storage import download_file_from_storage, minio_client, upload_file_to_storage
+from ..storage import download_file_from_storage, get_minio_client, upload_file_to_storage
 
 logger = logging.getLogger(__name__)
 
@@ -197,8 +197,9 @@ async def _process_image(file_data: bytes, asset: Asset) -> bytes:
 def _ensure_bucket_exists(bucket_name: str):
     """Ensure MinIO bucket exists, create if not"""
     try:
-        if not minio_client.bucket_exists(bucket_name):
-            minio_client.make_bucket(bucket_name)
+        client = get_minio_client()
+        if not client.bucket_exists(bucket_name):
+            client.make_bucket(bucket_name)
             logger.info(f"Created bucket: {bucket_name}")
     except Exception as e:
         logger.warning(f"Could not ensure bucket exists: {e}")
@@ -235,6 +236,8 @@ def extract_metadata_task(asset_id: str):
                 file_data = download_file_from_storage(
                     bucket_name=bucket_name, object_name=asset.path
                 )
+                if file_data is None:
+                    raise Exception("Failed to download file from storage")
                 temp_file.write(file_data)
                 temp_file.flush()
 
