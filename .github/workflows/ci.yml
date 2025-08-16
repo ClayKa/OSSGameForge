@@ -97,7 +97,6 @@ jobs:
           USE_LOCAL_MODEL: false
         run: |
           PYTHONPATH=backend pytest backend/tests \
-          pytest \
             --cov=backend \
             --cov-report=xml \
             --cov-report=term-missing \

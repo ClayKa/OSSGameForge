@@ -1,0 +1,1508 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="1" failures="56" skipped="0" tests="130" time="4.739" timestamp="2025-08-16T16:35:48.005245+08:00" hostname="ClayKas-MacBook-Pro.local"><testcase classname="backend.tests.backend.integration.test_api_integration.TestAPIIntegration" name="test_health_check_integration" time="0.019"><failure message="AssertionError: Missing field: service&#10;assert 'service' in {'environment': 'production', 'services': {'database': {'status': 'ok', 'type': 'postgresql'}, 'inference': {'mode': 'golden_samples', 'status': 'fallback'}, 'storage': {'status': 'ok', 'type': 'minio'}}, 'status': 'healthy', 'version': '0.1.0'}">self = &lt;tests.backend.integration.test_api_integration.TestAPIIntegration object at 0x12687bc20&gt;
+test_client = &lt;starlette.testclient.TestClient object at 0x126a3aa20&gt;
+
+    def test_health_check_integration(self, test_client):
+        """Test health check endpoint integration"""
+        response = test_client.get("/health")
+    
+        assert response.status_code == 200
+        data = response.json()
+    
+        # Verify all expected fields are present
+        expected_fields = ["status", "service", "version", "mock_mode", "use_local_model"]
+        for field in expected_fields:
+&gt;           assert field in data, f"Missing field: {field}"
+E           AssertionError: Missing field: service
+E           assert 'service' in {'environment': 'production', 'services': {'database': {'status': 'ok', 'type': 'postgresql'}, 'inference': {'mode': 'golden_samples', 'status': 'fallback'}, 'storage': {'status': 'ok', 'type': 'minio'}}, 'status': 'healthy', 'version': '0.1.0'}
+
+backend/tests/backend/integration/test_api_integration.py:23: AssertionError</failure></testcase><testcase classname="backend.tests.backend.integration.test_api_integration.TestAPIIntegration" name="test_root_endpoint_integration" time="0.004" /><testcase classname="backend.tests.backend.integration.test_api_integration.TestAPIIntegration" name="test_openapi_schema_integration" time="0.025"><failure message="AssertionError: assert '/health' in {'/': {'get': {'description': 'Root endpoint with API information', 'operationId': 'root__get', 'responses': {'200': {'content': {'application/json': {...}}, 'description': 'Successful Response'}}, 'summary': 'Root'}}, '/api/assets/{asset_id}': {'get': {'description': 'Get asset details', 'operationId': 'get_asset_api_assets__asset_id__get', 'parameters': [{'in': 'path', 'name': 'asset_id', 'required': True, 'schema': {'title': 'Asset Id', 'type': 'string'}}], 'responses': {'200': {'content': {'application/json': {...}}, 'description': 'Successful Response'}, '422': {'content': {'application/json': {...}}, 'description': 'Validation Error'}}, ...}}, '/api/export': {'post': {'description': 'Export scene to playable format', 'operationId': 'export_scene_api_export_post', 'parameters': [{'in': 'query', 'name': 'engine', 'required': False, 'schema': {'allOf': [...], 'default': 'html5', 'title': 'Engine'}}], 'requestBody': {'content': {'application/json': {'schema': {...}}}, 'required': True}, ...}}, '/api/generation/': {'post': {'description': 'Generate a game scene from prompt with comprehensive logging\n\nThis endpoint:\n1. Builds context from the user prompt and assets\n2. Calls the inference service (with automatic fallback)\n3. Post-processes the result\n4. Logs everything to the database\n5. Returns the generated scene', 'operationId': 'generate_scene_api_generation__post', 'requestBody': {'content': {'application/json': {'schema': {...}}}, 'required': True}, 'responses': {'200': {'content': {'application/json': {...}}, 'description': 'Successful Response'}, '422': {'content': {'application/json': {...}}, 'description': 'Validation Error'}}, ...}}, ...}">self = &lt;tests.backend.integration.test_api_integration.TestAPIIntegration object at 0x1268ebd10&gt;
+test_client = &lt;starlette.testclient.TestClient object at 0x126ac3560&gt;
+
+    def test_openapi_schema_integration(self, test_client):
+        """Test OpenAPI schema generation"""
+        response = test_client.get("/openapi.json")
+    
+        assert response.status_code == 200
+        schema = response.json()
+    
+        # Verify OpenAPI structure
+        assert schema["openapi"].startswith("3.")
+        assert schema["info"]["title"] == "OSSGameForge API"
+    
+        # Verify endpoints are documented
+&gt;       assert "/health" in schema["paths"]
+E       AssertionError: assert '/health' in {'/': {'get': {'description': 'Root endpoint with API information', 'operationId': 'root__get', 'responses': {'200': {'content': {'application/json': {...}}, 'description': 'Successful Response'}}, 'summary': 'Root'}}, '/api/assets/{asset_id}': {'get': {'description': 'Get asset details', 'operationId': 'get_asset_api_assets__asset_id__get', 'parameters': [{'in': 'path', 'name': 'asset_id', 'required': True, 'schema': {'title': 'Asset Id', 'type': 'string'}}], 'responses': {'200': {'content': {'application/json': {...}}, 'description': 'Successful Response'}, '422': {'content': {'application/json': {...}}, 'description': 'Validation Error'}}, ...}}, '/api/export': {'post': {'description': 'Export scene to playable format', 'operationId': 'export_scene_api_export_post', 'parameters': [{'in': 'query', 'name': 'engine', 'required': False, 'schema': {'allOf': [...], 'default': 'html5', 'title': 'Engine'}}], 'requestBody': {'content': {'application/json': {'schema': {...}}}, 'required': True}, ...}}, '/api/generation/': {'post': {'description': 'Generate a game scene from prompt with comprehensive logging\n\nThis endpoint:\n1. Builds context from the user prompt and assets\n2. Calls the inference service (with automatic fallback)\n3. Post-processes the result\n4. Logs everything to the database\n5. Returns the generated scene', 'operationId': 'generate_scene_api_generation__post', 'requestBody': {'content': {'application/json': {'schema': {...}}}, 'required': True}, 'responses': {'200': {'content': {'application/json': {...}}, 'description': 'Successful Response'}, '422': {'content': {'application/json': {...}}, 'description': 'Validation Error'}}, ...}}, ...}
+
+backend/tests/backend/integration/test_api_integration.py:60: AssertionError</failure></testcase><testcase classname="backend.tests.backend.integration.test_api_integration.TestAPIIntegration" name="test_cors_headers_integration" time="0.003" /><testcase classname="backend.tests.backend.integration.test_api_integration.TestAPIIntegration" name="test_invalid_endpoint_returns_404" time="0.004" /><testcase classname="backend.tests.backend.integration.test_api_integration.TestAPIIntegration" name="test_method_not_allowed" time="0.004" /><testcase classname="backend.tests.backend.integration.test_api_integration.TestAPIIntegration" name="test_endpoints_accessibility[/health-get]" time="0.005" /><testcase classname="backend.tests.backend.integration.test_api_integration.TestAPIIntegration" name="test_endpoints_accessibility[/-get]" time="0.003" /><testcase classname="backend.tests.backend.integration.test_api_integration.TestAPIIntegration" name="test_endpoints_accessibility[/docs-get]" time="0.004" /><testcase classname="backend.tests.backend.integration.test_api_integration.TestAPIIntegration" name="test_endpoints_accessibility[/openapi.json-get]" time="0.003" /><testcase classname="backend.tests.backend.integration.test_api_integration.TestAPIIntegration" name="test_concurrent_requests" time="0.047" /><testcase classname="backend.tests.backend.integration.test_api_integration.TestDatabaseIntegration" name="test_database_session_lifecycle" time="0.002"><error message="failed on setup with &quot;file /Users/clayka7/Documents/OSSGF/backend/tests/backend/integration/test_api_integration.py, line 140&#10;      def test_database_session_lifecycle(self, test_client, _test_db_session):&#10;E       fixture '_test_db_session' not found&#10;&gt;       available fixtures: _class_scoped_runner, _function_scoped_runner, _module_scoped_runner, _package_scoped_runner, _session_scoped_runner, anyio_backend, anyio_backend_name, anyio_backend_options, async_client, auth_headers, cache, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, cov, doctest_namespace, event_loop, event_loop_policy, mock_minio_client, mock_settings, monkeypatch, no_cover, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, sample_audio_file, sample_image_file, test_client, test_db_engine, test_db_session, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory, unused_tcp_port, unused_tcp_port_factory, unused_udp_port, unused_udp_port_factory&#10;&gt;       use 'pytest --fixtures [testpath]' for help on them.&#10;&#10;/Users/clayka7/Documents/OSSGF/backend/tests/backend/integration/test_api_integration.py:140&quot;">file /Users/clayka7/Documents/OSSGF/backend/tests/backend/integration/test_api_integration.py, line 140
+      def test_database_session_lifecycle(self, test_client, _test_db_session):
+E       fixture '_test_db_session' not found
+&gt;       available fixtures: _class_scoped_runner, _function_scoped_runner, _module_scoped_runner, _package_scoped_runner, _session_scoped_runner, anyio_backend, anyio_backend_name, anyio_backend_options, async_client, auth_headers, cache, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, cov, doctest_namespace, event_loop, event_loop_policy, mock_minio_client, mock_settings, monkeypatch, no_cover, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, sample_audio_file, sample_image_file, test_client, test_db_engine, test_db_session, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory, unused_tcp_port, unused_tcp_port_factory, unused_udp_port, unused_udp_port_factory
+&gt;       use 'pytest --fixtures [testpath]' for help on them.
+
+/Users/clayka7/Documents/OSSGF/backend/tests/backend/integration/test_api_integration.py:140</error></testcase><testcase classname="backend.tests.backend.integration.test_api_integration.TestDatabaseIntegration" name="test_database_rollback_on_error" time="0.002" /><testcase classname="backend.tests.backend.integration.test_api_integration.TestEnvironmentConfiguration" name="test_mock_mode_enabled" time="0.024" /><testcase classname="backend.tests.backend.integration.test_api_integration.TestEnvironmentConfiguration" name="test_local_model_enabled" time="0.005" /><testcase classname="backend.tests.backend.test_health" name="test_health_check" time="0.005" /><testcase classname="backend.tests.backend.test_health" name="test_root_endpoint" time="0.003" /><testcase classname="backend.tests.backend.test_health" name="test_openapi_schema_available" time="0.003" /><testcase classname="backend.tests.backend.test_health" name="test_docs_available" time="0.003" /><testcase classname="backend.tests.backend.test_routers.TestHealthEndpoint" name="test_health_check" time="0.832"><failure message="AssertionError: assert 'degraded' == 'healthy'&#10;  &#10;  - healthy&#10;  + degraded">self = &lt;tests.backend.test_routers.TestHealthEndpoint object at 0x126967800&gt;
+
+    def test_health_check(self):
+        """Test health endpoint returns correct status"""
+        response = client.get("/health")
+        assert response.status_code == 200
+        data = response.json()
+&gt;       assert data["status"] == "healthy"
+E       AssertionError: assert 'degraded' == 'healthy'
+E         
+E         - healthy
+E         + degraded
+
+backend/tests/backend/test_routers.py:22: AssertionError</failure></testcase><testcase classname="backend.tests.backend.test_routers.TestProjectsRouter" name="test_list_projects_mock_mode" time="0.001"><failure message="ModuleNotFoundError: No module named 'backend'">args = (&lt;tests.backend.test_routers.TestProjectsRouter object at 0x126967950&gt;,)
+keywargs = {}
+
+    @wraps(func)
+    def patched(*args, **keywargs):
+&gt;       with self.decoration_helper(patched,
+                                    args,
+                                    keywargs) as (newargs, newkeywargs):
+
+/opt/anaconda3/lib/python3.12/unittest/mock.py:1392: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/anaconda3/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/unittest/mock.py:1374: in decoration_helper
+    arg = exit_stack.enter_context(patching)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/contextlib.py:526: in enter_context
+    result = _enter(cm)
+             ^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/unittest/mock.py:1447: in __enter__
+    self.target = self.getter()
+                  ^^^^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/pkgutil.py:513: in resolve_name
+    mod = importlib.import_module(modname)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'backend', package = None
+
+    def import_module(name, package=None):
+        """Import a module.
+    
+        The 'package' argument is required when performing a relative import. It
+        specifies the package to use as the anchor point from which to resolve the
+        relative import to an absolute import.
+    
+        """
+        level = 0
+        if name.startswith('.'):
+            if not package:
+                raise TypeError("the 'package' argument is required to perform a "
+                                f"relative import for {name!r}")
+            for character in name:
+                if character != '.':
+                    break
+                level += 1
+&gt;       return _bootstrap._gcd_import(name[level:], package, level)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ModuleNotFoundError: No module named 'backend'
+
+/opt/anaconda3/lib/python3.12/importlib/__init__.py:90: ModuleNotFoundError</failure></testcase><testcase classname="backend.tests.backend.test_routers.TestProjectsRouter" name="test_create_project_mock_mode" time="0.000"><failure message="ModuleNotFoundError: No module named 'backend'">args = (&lt;tests.backend.test_routers.TestProjectsRouter object at 0x126967b00&gt;,)
+keywargs = {}
+
+    @wraps(func)
+    def patched(*args, **keywargs):
+&gt;       with self.decoration_helper(patched,
+                                    args,
+                                    keywargs) as (newargs, newkeywargs):
+
+/opt/anaconda3/lib/python3.12/unittest/mock.py:1392: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/anaconda3/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/unittest/mock.py:1374: in decoration_helper
+    arg = exit_stack.enter_context(patching)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/contextlib.py:526: in enter_context
+    result = _enter(cm)
+             ^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/unittest/mock.py:1447: in __enter__
+    self.target = self.getter()
+                  ^^^^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/pkgutil.py:513: in resolve_name
+    mod = importlib.import_module(modname)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'backend', package = None
+
+    def import_module(name, package=None):
+        """Import a module.
+    
+        The 'package' argument is required when performing a relative import. It
+        specifies the package to use as the anchor point from which to resolve the
+        relative import to an absolute import.
+    
+        """
+        level = 0
+        if name.startswith('.'):
+            if not package:
+                raise TypeError("the 'package' argument is required to perform a "
+                                f"relative import for {name!r}")
+            for character in name:
+                if character != '.':
+                    break
+                level += 1
+&gt;       return _bootstrap._gcd_import(name[level:], package, level)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ModuleNotFoundError: No module named 'backend'
+
+/opt/anaconda3/lib/python3.12/importlib/__init__.py:90: ModuleNotFoundError</failure></testcase><testcase classname="backend.tests.backend.test_routers.TestProjectsRouter" name="test_get_project_mock_mode" time="0.000"><failure message="ModuleNotFoundError: No module named 'backend'">args = (&lt;tests.backend.test_routers.TestProjectsRouter object at 0x126967cb0&gt;,)
+keywargs = {}
+
+    @wraps(func)
+    def patched(*args, **keywargs):
+&gt;       with self.decoration_helper(patched,
+                                    args,
+                                    keywargs) as (newargs, newkeywargs):
+
+/opt/anaconda3/lib/python3.12/unittest/mock.py:1392: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/anaconda3/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/unittest/mock.py:1374: in decoration_helper
+    arg = exit_stack.enter_context(patching)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/contextlib.py:526: in enter_context
+    result = _enter(cm)
+             ^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/unittest/mock.py:1447: in __enter__
+    self.target = self.getter()
+                  ^^^^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/pkgutil.py:513: in resolve_name
+    mod = importlib.import_module(modname)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'backend', package = None
+
+    def import_module(name, package=None):
+        """Import a module.
+    
+        The 'package' argument is required when performing a relative import. It
+        specifies the package to use as the anchor point from which to resolve the
+        relative import to an absolute import.
+    
+        """
+        level = 0
+        if name.startswith('.'):
+            if not package:
+                raise TypeError("the 'package' argument is required to perform a "
+                                f"relative import for {name!r}")
+            for character in name:
+                if character != '.':
+                    break
+                level += 1
+&gt;       return _bootstrap._gcd_import(name[level:], package, level)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ModuleNotFoundError: No module named 'backend'
+
+/opt/anaconda3/lib/python3.12/importlib/__init__.py:90: ModuleNotFoundError</failure></testcase><testcase classname="backend.tests.backend.test_routers.TestProjectsRouter" name="test_get_project_not_found" time="0.000"><failure message="ModuleNotFoundError: No module named 'backend'">args = (&lt;tests.backend.test_routers.TestProjectsRouter object at 0x126967e60&gt;,)
+keywargs = {}
+
+    @wraps(func)
+    def patched(*args, **keywargs):
+&gt;       with self.decoration_helper(patched,
+                                    args,
+                                    keywargs) as (newargs, newkeywargs):
+
+/opt/anaconda3/lib/python3.12/unittest/mock.py:1392: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/anaconda3/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/unittest/mock.py:1374: in decoration_helper
+    arg = exit_stack.enter_context(patching)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/contextlib.py:526: in enter_context
+    result = _enter(cm)
+             ^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/unittest/mock.py:1447: in __enter__
+    self.target = self.getter()
+                  ^^^^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/pkgutil.py:513: in resolve_name
+    mod = importlib.import_module(modname)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'backend', package = None
+
+    def import_module(name, package=None):
+        """Import a module.
+    
+        The 'package' argument is required when performing a relative import. It
+        specifies the package to use as the anchor point from which to resolve the
+        relative import to an absolute import.
+    
+        """
+        level = 0
+        if name.startswith('.'):
+            if not package:
+                raise TypeError("the 'package' argument is required to perform a "
+                                f"relative import for {name!r}")
+            for character in name:
+                if character != '.':
+                    break
+                level += 1
+&gt;       return _bootstrap._gcd_import(name[level:], package, level)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ModuleNotFoundError: No module named 'backend'
+
+/opt/anaconda3/lib/python3.12/importlib/__init__.py:90: ModuleNotFoundError</failure></testcase><testcase classname="backend.tests.backend.test_routers.TestAssetsRouter" name="test_upload_asset_with_consent" time="0.000"><failure message="ModuleNotFoundError: No module named 'backend'">args = (&lt;tests.backend.test_routers.TestAssetsRouter object at 0x1269940b0&gt;,)
+keywargs = {}
+
+    @wraps(func)
+    def patched(*args, **keywargs):
+&gt;       with self.decoration_helper(patched,
+                                    args,
+                                    keywargs) as (newargs, newkeywargs):
+
+/opt/anaconda3/lib/python3.12/unittest/mock.py:1392: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/anaconda3/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/unittest/mock.py:1374: in decoration_helper
+    arg = exit_stack.enter_context(patching)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/contextlib.py:526: in enter_context
+    result = _enter(cm)
+             ^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/unittest/mock.py:1447: in __enter__
+    self.target = self.getter()
+                  ^^^^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/pkgutil.py:513: in resolve_name
+    mod = importlib.import_module(modname)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'backend', package = None
+
+    def import_module(name, package=None):
+        """Import a module.
+    
+        The 'package' argument is required when performing a relative import. It
+        specifies the package to use as the anchor point from which to resolve the
+        relative import to an absolute import.
+    
+        """
+        level = 0
+        if name.startswith('.'):
+            if not package:
+                raise TypeError("the 'package' argument is required to perform a "
+                                f"relative import for {name!r}")
+            for character in name:
+                if character != '.':
+                    break
+                level += 1
+&gt;       return _bootstrap._gcd_import(name[level:], package, level)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ModuleNotFoundError: No module named 'backend'
+
+/opt/anaconda3/lib/python3.12/importlib/__init__.py:90: ModuleNotFoundError</failure></testcase><testcase classname="backend.tests.backend.test_routers.TestAssetsRouter" name="test_upload_asset_without_consent" time="0.000"><failure message="ModuleNotFoundError: No module named 'backend'">args = (&lt;tests.backend.test_routers.TestAssetsRouter object at 0x126994260&gt;,)
+keywargs = {}
+
+    @wraps(func)
+    def patched(*args, **keywargs):
+&gt;       with self.decoration_helper(patched,
+                                    args,
+                                    keywargs) as (newargs, newkeywargs):
+
+/opt/anaconda3/lib/python3.12/unittest/mock.py:1392: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/anaconda3/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/unittest/mock.py:1374: in decoration_helper
+    arg = exit_stack.enter_context(patching)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/contextlib.py:526: in enter_context
+    result = _enter(cm)
+             ^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/unittest/mock.py:1447: in __enter__
+    self.target = self.getter()
+                  ^^^^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/pkgutil.py:513: in resolve_name
+    mod = importlib.import_module(modname)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'backend', package = None
+
+    def import_module(name, package=None):
+        """Import a module.
+    
+        The 'package' argument is required when performing a relative import. It
+        specifies the package to use as the anchor point from which to resolve the
+        relative import to an absolute import.
+    
+        """
+        level = 0
+        if name.startswith('.'):
+            if not package:
+                raise TypeError("the 'package' argument is required to perform a "
+                                f"relative import for {name!r}")
+            for character in name:
+                if character != '.':
+                    break
+                level += 1
+&gt;       return _bootstrap._gcd_import(name[level:], package, level)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ModuleNotFoundError: No module named 'backend'
+
+/opt/anaconda3/lib/python3.12/importlib/__init__.py:90: ModuleNotFoundError</failure></testcase><testcase classname="backend.tests.backend.test_routers.TestAssetsRouter" name="test_list_project_assets" time="0.000"><failure message="ModuleNotFoundError: No module named 'backend'">args = (&lt;tests.backend.test_routers.TestAssetsRouter object at 0x126994410&gt;,)
+keywargs = {}
+
+    @wraps(func)
+    def patched(*args, **keywargs):
+&gt;       with self.decoration_helper(patched,
+                                    args,
+                                    keywargs) as (newargs, newkeywargs):
+
+/opt/anaconda3/lib/python3.12/unittest/mock.py:1392: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/anaconda3/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/unittest/mock.py:1374: in decoration_helper
+    arg = exit_stack.enter_context(patching)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/contextlib.py:526: in enter_context
+    result = _enter(cm)
+             ^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/unittest/mock.py:1447: in __enter__
+    self.target = self.getter()
+                  ^^^^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/pkgutil.py:513: in resolve_name
+    mod = importlib.import_module(modname)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'backend', package = None
+
+    def import_module(name, package=None):
+        """Import a module.
+    
+        The 'package' argument is required when performing a relative import. It
+        specifies the package to use as the anchor point from which to resolve the
+        relative import to an absolute import.
+    
+        """
+        level = 0
+        if name.startswith('.'):
+            if not package:
+                raise TypeError("the 'package' argument is required to perform a "
+                                f"relative import for {name!r}")
+            for character in name:
+                if character != '.':
+                    break
+                level += 1
+&gt;       return _bootstrap._gcd_import(name[level:], package, level)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ModuleNotFoundError: No module named 'backend'
+
+/opt/anaconda3/lib/python3.12/importlib/__init__.py:90: ModuleNotFoundError</failure></testcase><testcase classname="backend.tests.backend.test_routers.TestAssetsRouter" name="test_get_asset" time="0.000"><failure message="ModuleNotFoundError: No module named 'backend'">args = (&lt;tests.backend.test_routers.TestAssetsRouter object at 0x1269945c0&gt;,)
+keywargs = {}
+
+    @wraps(func)
+    def patched(*args, **keywargs):
+&gt;       with self.decoration_helper(patched,
+                                    args,
+                                    keywargs) as (newargs, newkeywargs):
+
+/opt/anaconda3/lib/python3.12/unittest/mock.py:1392: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/anaconda3/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/unittest/mock.py:1374: in decoration_helper
+    arg = exit_stack.enter_context(patching)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/contextlib.py:526: in enter_context
+    result = _enter(cm)
+             ^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/unittest/mock.py:1447: in __enter__
+    self.target = self.getter()
+                  ^^^^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/pkgutil.py:513: in resolve_name
+    mod = importlib.import_module(modname)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'backend', package = None
+
+    def import_module(name, package=None):
+        """Import a module.
+    
+        The 'package' argument is required when performing a relative import. It
+        specifies the package to use as the anchor point from which to resolve the
+        relative import to an absolute import.
+    
+        """
+        level = 0
+        if name.startswith('.'):
+            if not package:
+                raise TypeError("the 'package' argument is required to perform a "
+                                f"relative import for {name!r}")
+            for character in name:
+                if character != '.':
+                    break
+                level += 1
+&gt;       return _bootstrap._gcd_import(name[level:], package, level)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ModuleNotFoundError: No module named 'backend'
+
+/opt/anaconda3/lib/python3.12/importlib/__init__.py:90: ModuleNotFoundError</failure></testcase><testcase classname="backend.tests.backend.test_routers.TestGenerationRouter" name="test_generate_scene" time="0.001"><failure message="ModuleNotFoundError: No module named 'backend'">args = (&lt;tests.backend.test_routers.TestGenerationRouter object at 0x126994800&gt;,)
+keywargs = {}
+
+    @wraps(func)
+    def patched(*args, **keywargs):
+&gt;       with self.decoration_helper(patched,
+                                    args,
+                                    keywargs) as (newargs, newkeywargs):
+
+/opt/anaconda3/lib/python3.12/unittest/mock.py:1392: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/anaconda3/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/unittest/mock.py:1374: in decoration_helper
+    arg = exit_stack.enter_context(patching)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/contextlib.py:526: in enter_context
+    result = _enter(cm)
+             ^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/unittest/mock.py:1447: in __enter__
+    self.target = self.getter()
+                  ^^^^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/pkgutil.py:513: in resolve_name
+    mod = importlib.import_module(modname)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'backend', package = None
+
+    def import_module(name, package=None):
+        """Import a module.
+    
+        The 'package' argument is required when performing a relative import. It
+        specifies the package to use as the anchor point from which to resolve the
+        relative import to an absolute import.
+    
+        """
+        level = 0
+        if name.startswith('.'):
+            if not package:
+                raise TypeError("the 'package' argument is required to perform a "
+                                f"relative import for {name!r}")
+            for character in name:
+                if character != '.':
+                    break
+                level += 1
+&gt;       return _bootstrap._gcd_import(name[level:], package, level)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ModuleNotFoundError: No module named 'backend'
+
+/opt/anaconda3/lib/python3.12/importlib/__init__.py:90: ModuleNotFoundError</failure></testcase><testcase classname="backend.tests.backend.test_routers.TestGenerationRouter" name="test_generate_scene_with_assets" time="0.000"><failure message="ModuleNotFoundError: No module named 'backend'">args = (&lt;tests.backend.test_routers.TestGenerationRouter object at 0x1269949b0&gt;,)
+keywargs = {}
+
+    @wraps(func)
+    def patched(*args, **keywargs):
+&gt;       with self.decoration_helper(patched,
+                                    args,
+                                    keywargs) as (newargs, newkeywargs):
+
+/opt/anaconda3/lib/python3.12/unittest/mock.py:1392: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/anaconda3/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/unittest/mock.py:1374: in decoration_helper
+    arg = exit_stack.enter_context(patching)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/contextlib.py:526: in enter_context
+    result = _enter(cm)
+             ^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/unittest/mock.py:1447: in __enter__
+    self.target = self.getter()
+                  ^^^^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/pkgutil.py:513: in resolve_name
+    mod = importlib.import_module(modname)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'backend', package = None
+
+    def import_module(name, package=None):
+        """Import a module.
+    
+        The 'package' argument is required when performing a relative import. It
+        specifies the package to use as the anchor point from which to resolve the
+        relative import to an absolute import.
+    
+        """
+        level = 0
+        if name.startswith('.'):
+            if not package:
+                raise TypeError("the 'package' argument is required to perform a "
+                                f"relative import for {name!r}")
+            for character in name:
+                if character != '.':
+                    break
+                level += 1
+&gt;       return _bootstrap._gcd_import(name[level:], package, level)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ModuleNotFoundError: No module named 'backend'
+
+/opt/anaconda3/lib/python3.12/importlib/__init__.py:90: ModuleNotFoundError</failure></testcase><testcase classname="backend.tests.backend.test_routers.TestExportRouter" name="test_export_html5" time="0.000"><failure message="ModuleNotFoundError: No module named 'backend'">args = (&lt;tests.backend.test_routers.TestExportRouter object at 0x126994b90&gt;,)
+keywargs = {}
+
+    @wraps(func)
+    def patched(*args, **keywargs):
+&gt;       with self.decoration_helper(patched,
+                                    args,
+                                    keywargs) as (newargs, newkeywargs):
+
+/opt/anaconda3/lib/python3.12/unittest/mock.py:1392: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/anaconda3/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/unittest/mock.py:1374: in decoration_helper
+    arg = exit_stack.enter_context(patching)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/contextlib.py:526: in enter_context
+    result = _enter(cm)
+             ^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/unittest/mock.py:1447: in __enter__
+    self.target = self.getter()
+                  ^^^^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/pkgutil.py:513: in resolve_name
+    mod = importlib.import_module(modname)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'backend', package = None
+
+    def import_module(name, package=None):
+        """Import a module.
+    
+        The 'package' argument is required when performing a relative import. It
+        specifies the package to use as the anchor point from which to resolve the
+        relative import to an absolute import.
+    
+        """
+        level = 0
+        if name.startswith('.'):
+            if not package:
+                raise TypeError("the 'package' argument is required to perform a "
+                                f"relative import for {name!r}")
+            for character in name:
+                if character != '.':
+                    break
+                level += 1
+&gt;       return _bootstrap._gcd_import(name[level:], package, level)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ModuleNotFoundError: No module named 'backend'
+
+/opt/anaconda3/lib/python3.12/importlib/__init__.py:90: ModuleNotFoundError</failure></testcase><testcase classname="backend.tests.backend.test_routers.TestExportRouter" name="test_export_godot" time="0.001"><failure message="ModuleNotFoundError: No module named 'backend'">args = (&lt;tests.backend.test_routers.TestExportRouter object at 0x126994d40&gt;,)
+keywargs = {}
+
+    @wraps(func)
+    def patched(*args, **keywargs):
+&gt;       with self.decoration_helper(patched,
+                                    args,
+                                    keywargs) as (newargs, newkeywargs):
+
+/opt/anaconda3/lib/python3.12/unittest/mock.py:1392: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/anaconda3/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/unittest/mock.py:1374: in decoration_helper
+    arg = exit_stack.enter_context(patching)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/contextlib.py:526: in enter_context
+    result = _enter(cm)
+             ^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/unittest/mock.py:1447: in __enter__
+    self.target = self.getter()
+                  ^^^^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/pkgutil.py:513: in resolve_name
+    mod = importlib.import_module(modname)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'backend', package = None
+
+    def import_module(name, package=None):
+        """Import a module.
+    
+        The 'package' argument is required when performing a relative import. It
+        specifies the package to use as the anchor point from which to resolve the
+        relative import to an absolute import.
+    
+        """
+        level = 0
+        if name.startswith('.'):
+            if not package:
+                raise TypeError("the 'package' argument is required to perform a "
+                                f"relative import for {name!r}")
+            for character in name:
+                if character != '.':
+                    break
+                level += 1
+&gt;       return _bootstrap._gcd_import(name[level:], package, level)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ModuleNotFoundError: No module named 'backend'
+
+/opt/anaconda3/lib/python3.12/importlib/__init__.py:90: ModuleNotFoundError</failure></testcase><testcase classname="backend.tests.backend.test_routers.TestExportRouter" name="test_export_unsupported_engine" time="0.000"><failure message="ModuleNotFoundError: No module named 'backend'">args = (&lt;tests.backend.test_routers.TestExportRouter object at 0x126994ef0&gt;,)
+keywargs = {}
+
+    @wraps(func)
+    def patched(*args, **keywargs):
+&gt;       with self.decoration_helper(patched,
+                                    args,
+                                    keywargs) as (newargs, newkeywargs):
+
+/opt/anaconda3/lib/python3.12/unittest/mock.py:1392: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/anaconda3/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/unittest/mock.py:1374: in decoration_helper
+    arg = exit_stack.enter_context(patching)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/contextlib.py:526: in enter_context
+    result = _enter(cm)
+             ^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/unittest/mock.py:1447: in __enter__
+    self.target = self.getter()
+                  ^^^^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/pkgutil.py:513: in resolve_name
+    mod = importlib.import_module(modname)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'backend', package = None
+
+    def import_module(name, package=None):
+        """Import a module.
+    
+        The 'package' argument is required when performing a relative import. It
+        specifies the package to use as the anchor point from which to resolve the
+        relative import to an absolute import.
+    
+        """
+        level = 0
+        if name.startswith('.'):
+            if not package:
+                raise TypeError("the 'package' argument is required to perform a "
+                                f"relative import for {name!r}")
+            for character in name:
+                if character != '.':
+                    break
+                level += 1
+&gt;       return _bootstrap._gcd_import(name[level:], package, level)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ModuleNotFoundError: No module named 'backend'
+
+/opt/anaconda3/lib/python3.12/importlib/__init__.py:90: ModuleNotFoundError</failure></testcase><testcase classname="backend.tests.backend.test_routers.TestAPIDocumentation" name="test_swagger_ui_accessible" time="0.002" /><testcase classname="backend.tests.backend.test_routers.TestAPIDocumentation" name="test_openapi_schema_accessible" time="0.001"><failure message="AssertionError: assert '/health' in {'/': {'get': {'description': 'Root endpoint with API information', 'operationId': 'root__get', 'responses': {'200': {'content': {'application/json': {...}}, 'description': 'Successful Response'}}, 'summary': 'Root'}}, '/api/assets/{asset_id}': {'get': {'description': 'Get asset details', 'operationId': 'get_asset_api_assets__asset_id__get', 'parameters': [{'in': 'path', 'name': 'asset_id', 'required': True, 'schema': {'title': 'Asset Id', 'type': 'string'}}], 'responses': {'200': {'content': {'application/json': {...}}, 'description': 'Successful Response'}, '422': {'content': {'application/json': {...}}, 'description': 'Validation Error'}}, ...}}, '/api/export': {'post': {'description': 'Export scene to playable format', 'operationId': 'export_scene_api_export_post', 'parameters': [{'in': 'query', 'name': 'engine', 'required': False, 'schema': {'allOf': [...], 'default': 'html5', 'title': 'Engine'}}], 'requestBody': {'content': {'application/json': {'schema': {...}}}, 'required': True}, ...}}, '/api/generation/': {'post': {'description': 'Generate a game scene from prompt with comprehensive logging\n\nThis endpoint:\n1. Builds context from the user prompt and assets\n2. Calls the inference service (with automatic fallback)\n3. Post-processes the result\n4. Logs everything to the database\n5. Returns the generated scene', 'operationId': 'generate_scene_api_generation__post', 'requestBody': {'content': {'application/json': {'schema': {...}}}, 'required': True}, 'responses': {'200': {'content': {'application/json': {...}}, 'description': 'Successful Response'}, '422': {'content': {'application/json': {...}}, 'description': 'Validation Error'}}, ...}}, ...}">self = &lt;tests.backend.test_routers.TestAPIDocumentation object at 0x1269949e0&gt;
+
+    def test_openapi_schema_accessible(self):
+        """Test that OpenAPI schema is accessible"""
+        response = client.get("/openapi.json")
+        assert response.status_code == 200
+        data = response.json()
+        assert "openapi" in data
+        assert "paths" in data
+&gt;       assert "/health" in data["paths"]
+E       AssertionError: assert '/health' in {'/': {'get': {'description': 'Root endpoint with API information', 'operationId': 'root__get', 'responses': {'200': {'content': {'application/json': {...}}, 'description': 'Successful Response'}}, 'summary': 'Root'}}, '/api/assets/{asset_id}': {'get': {'description': 'Get asset details', 'operationId': 'get_asset_api_assets__asset_id__get', 'parameters': [{'in': 'path', 'name': 'asset_id', 'required': True, 'schema': {'title': 'Asset Id', 'type': 'string'}}], 'responses': {'200': {'content': {'application/json': {...}}, 'description': 'Successful Response'}, '422': {'content': {'application/json': {...}}, 'description': 'Validation Error'}}, ...}}, '/api/export': {'post': {'description': 'Export scene to playable format', 'operationId': 'export_scene_api_export_post', 'parameters': [{'in': 'query', 'name': 'engine', 'required': False, 'schema': {'allOf': [...], 'default': 'html5', 'title': 'Engine'}}], 'requestBody': {'content': {'application/json': {'schema': {...}}}, 'required': True}, ...}}, '/api/generation/': {'post': {'description': 'Generate a game scene from prompt with comprehensive logging\n\nThis endpoint:\n1. Builds context from the user prompt and assets\n2. Calls the inference service (with automatic fallback)\n3. Post-processes the result\n4. Logs everything to the database\n5. Returns the generated scene', 'operationId': 'generate_scene_api_generation__post', 'requestBody': {'content': {'application/json': {'schema': {...}}}, 'required': True}, 'responses': {'200': {'content': {'application/json': {...}}, 'description': 'Successful Response'}, '422': {'content': {'application/json': {...}}, 'description': 'Validation Error'}}, ...}}, ...}
+
+backend/tests/backend/test_routers.py:310: AssertionError</failure></testcase><testcase classname="backend.tests.backend.test_schemas.TestProjectSchemas" name="test_project_create_valid" time="0.000" /><testcase classname="backend.tests.backend.test_schemas.TestProjectSchemas" name="test_project_create_without_description" time="0.000" /><testcase classname="backend.tests.backend.test_schemas.TestProjectSchemas" name="test_project_create_invalid_name" time="0.000" /><testcase classname="backend.tests.backend.test_schemas.TestProjectSchemas" name="test_project_response" time="0.000" /><testcase classname="backend.tests.backend.test_schemas.TestProjectSchemas" name="test_project_update" time="0.000" /><testcase classname="backend.tests.backend.test_schemas.TestAssetSchemas" name="test_asset_type_enum" time="0.000" /><testcase classname="backend.tests.backend.test_schemas.TestAssetSchemas" name="test_asset_status_enum" time="0.000" /><testcase classname="backend.tests.backend.test_schemas.TestAssetSchemas" name="test_asset_upload_response" time="0.000" /><testcase classname="backend.tests.backend.test_schemas.TestAssetSchemas" name="test_asset_response" time="0.000" /><testcase classname="backend.tests.backend.test_schemas.TestGenerationSchemas" name="test_game_style_enum" time="0.000" /><testcase classname="backend.tests.backend.test_schemas.TestGenerationSchemas" name="test_entity_type_enum" time="0.000" /><testcase classname="backend.tests.backend.test_schemas.TestGenerationSchemas" name="test_position_schema" time="0.000" /><testcase classname="backend.tests.backend.test_schemas.TestGenerationSchemas" name="test_size_schema" time="0.000" /><testcase classname="backend.tests.backend.test_schemas.TestGenerationSchemas" name="test_entity_schema" time="0.000" /><testcase classname="backend.tests.backend.test_schemas.TestGenerationSchemas" name="test_scene_metadata" time="0.000" /><testcase classname="backend.tests.backend.test_schemas.TestGenerationSchemas" name="test_generation_request" time="0.000" /><testcase classname="backend.tests.backend.test_schemas.TestGenerationSchemas" name="test_generation_request_validation" time="0.000" /><testcase classname="backend.tests.backend.test_schemas.TestGenerationSchemas" name="test_generation_response" time="0.000" /><testcase classname="backend.tests.backend.test_schemas.TestExportSchemas" name="test_export_engine_enum" time="0.000" /><testcase classname="backend.tests.backend.test_schemas.TestExportSchemas" name="test_export_request" time="0.000" /><testcase classname="backend.tests.backend.test_schemas.TestExportSchemas" name="test_export_request_defaults" time="0.000" /><testcase classname="backend.tests.backend.test_services.TestConfiguration" name="test_settings_defaults" time="0.001" /><testcase classname="backend.tests.backend.test_services.TestConfiguration" name="test_settings_from_environment" time="0.001" /><testcase classname="backend.tests.backend.test_services.TestConfiguration" name="test_cors_origins" time="0.001" /><testcase classname="backend.tests.backend.test_services.TestConfiguration" name="test_file_upload_settings" time="0.001" /><testcase classname="backend.tests.backend.test_services.TestMockDataLoading" name="test_load_mock_data_file_exists" time="0.001" /><testcase classname="backend.tests.backend.test_services.TestMockDataLoading" name="test_load_mock_data_file_not_exists" time="0.000" /><testcase classname="backend.tests.backend.test_services.TestMockDataLoading" name="test_load_mock_data_with_generation_samples" time="0.000"><failure message="ImportError: cannot import name 'load_mock_data' from 'app.routers.generation' (/Users/clayka7/Documents/OSSGF/backend/tests/../app/routers/generation.py)">self = &lt;tests.backend.test_services.TestMockDataLoading object at 0x1269ad010&gt;
+
+    def test_load_mock_data_with_generation_samples(self):
+        """Test loading mock data with generation samples"""
+        mock_data = {
+            "generation_samples": [
+                {"prompt": "Create a level", "scene": {"id": "scene_001", "name": "Test Scene"}}
+            ]
+        }
+    
+&gt;       from app.routers.generation import load_mock_data
+E       ImportError: cannot import name 'load_mock_data' from 'app.routers.generation' (/Users/clayka7/Documents/OSSGF/backend/tests/../app/routers/generation.py)
+
+backend/tests/backend/test_services.py:82: ImportError</failure></testcase><testcase classname="backend.tests.backend.test_services.TestUtilityFunctions" name="test_create_html5_export" time="0.001" /><testcase classname="backend.tests.backend.test_services.TestUtilityFunctions" name="test_project_id_generation" time="0.000" /><testcase classname="backend.tests.backend.test_services.TestErrorHandling" name="test_asset_upload_without_consent" time="0.000" /><testcase classname="backend.tests.backend.test_services.TestErrorHandling" name="test_file_size_validation" time="0.001" /><testcase classname="backend.tests.backend.test_services.TestDatabaseModels" name="test_asset_model_fields" time="0.000"><failure message="AssertionError: assert 'filename' in ['id', 'project_id', 'path', 'type', 'status', 'asset_metadata', ...]">self = &lt;tests.backend.test_services.TestDatabaseModels object at 0x1269ad400&gt;
+
+    def test_asset_model_fields(self):
+        """Test that Asset model has required fields"""
+        from app.models import Asset
+    
+        # Check that the model has the expected columns
+        columns = [c.name for c in Asset.__table__.columns]
+    
+        assert "id" in columns
+        assert "project_id" in columns
+&gt;       assert "filename" in columns
+E       AssertionError: assert 'filename' in ['id', 'project_id', 'path', 'type', 'status', 'asset_metadata', ...]
+
+backend/tests/backend/test_services.py:185: AssertionError</failure></testcase><testcase classname="backend.tests.backend.test_services.TestDatabaseModels" name="test_generation_log_model_fields" time="0.000"><failure message="AssertionError: assert 'prompt' in ['id', 'user_id', 'input_hash', 'prompt_hash', 'model_version', 'lora_adapter', ...]">self = &lt;tests.backend.test_services.TestDatabaseModels object at 0x1269ad310&gt;
+
+    def test_generation_log_model_fields(self):
+        """Test that GenerationLog model has required fields"""
+        from app.models import GenerationLog
+    
+        columns = [c.name for c in GenerationLog.__table__.columns]
+    
+        assert "id" in columns
+        assert "user_id" in columns
+&gt;       assert "prompt" in columns
+E       AssertionError: assert 'prompt' in ['id', 'user_id', 'input_hash', 'prompt_hash', 'model_version', 'lora_adapter', ...]
+
+backend/tests/backend/test_services.py:202: AssertionError</failure></testcase><testcase classname="backend.tests.backend.test_simple_imports" name="test_import_schemas" time="0.000" /><testcase classname="backend.tests.backend.test_simple_imports" name="test_import_config" time="0.001" /><testcase classname="backend.tests.backend.test_simple_imports" name="test_import_routers" time="0.000" /><testcase classname="backend.tests.backend.test_simple_imports" name="test_mock_mode_env" time="0.001" /><testcase classname="backend.tests.backend.test_simple_imports" name="test_api_endpoints_exist" time="0.000"><failure message="AssertionError: assert '/health' in ['/openapi.json', '/docs', '/docs/oauth2-redirect', '/redoc', '/health/', '/health/ready', ...]">def test_api_endpoints_exist():
+        """Test that API endpoints are registered"""
+        from app.main import app
+    
+        routes = [route.path for route in app.routes]
+    
+&gt;       assert "/health" in routes
+E       AssertionError: assert '/health' in ['/openapi.json', '/docs', '/docs/oauth2-redirect', '/redoc', '/health/', '/health/ready', ...]
+
+backend/tests/backend/test_simple_imports.py:58: AssertionError</failure></testcase><testcase classname="backend.tests.backend.unit.test_config.TestSettings" name="test_default_settings" time="0.001"><failure message="AssertionError: assert not True&#10; +  where True = Settings(app_name='OSSGameForge', app_version='0.1.0', debug=False, api_prefix='/api', mock_mode=True, use_local_model=False, database_url='postgresql://user:password@postgres:5432/ossgameforge', minio_endpoint='localhost:9000', minio_access_key='minioadmin', minio_secret_key='minioadmin', minio_secure=False, minio_bucket='ossgameforge', secret_key='your-secret-key-change-in-production', algorithm='HS256', access_token_expire_minutes=30, cors_origins=['http://localhost:3000', 'http://localhost:5173'], model_endpoint=None, model_timeout=60, model_max_retries=3, max_upload_size=104857600, allowed_image_types=['image/jpeg', 'image/png', 'image/gif', 'image/webp'], allowed_audio_types=['audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/webm'], allowed_video_types=['video/mp4', 'video/webm', 'video/ogg'], background_task_timeout=300).mock_mode">self = &lt;tests.backend.unit.test_config.TestSettings object at 0x1269aefc0&gt;
+
+    def test_default_settings(self):
+        """Test default settings are loaded correctly"""
+        settings = Settings()
+    
+        assert settings.app_name == "OSSGameForge"
+        assert settings.app_version == "0.1.0"
+        assert not settings.debug
+        assert settings.api_prefix == "/api"
+&gt;       assert not settings.mock_mode
+E       AssertionError: assert not True
+E        +  where True = Settings(app_name='OSSGameForge', app_version='0.1.0', debug=False, api_prefix='/api', mock_mode=True, use_local_model=False, database_url='postgresql://user:password@postgres:5432/ossgameforge', minio_endpoint='localhost:9000', minio_access_key='minioadmin', minio_secret_key='minioadmin', minio_secure=False, minio_bucket='ossgameforge', secret_key='your-secret-key-change-in-production', algorithm='HS256', access_token_expire_minutes=30, cors_origins=['http://localhost:3000', 'http://localhost:5173'], model_endpoint=None, model_timeout=60, model_max_retries=3, max_upload_size=104857600, allowed_image_types=['image/jpeg', 'image/png', 'image/gif', 'image/webp'], allowed_audio_types=['audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/webm'], allowed_video_types=['video/mp4', 'video/webm', 'video/ogg'], background_task_timeout=300).mock_mode
+
+backend/tests/backend/unit/test_config.py:26: AssertionError</failure></testcase><testcase classname="backend.tests.backend.unit.test_config.TestSettings" name="test_database_url_default" time="0.001" /><testcase classname="backend.tests.backend.unit.test_config.TestSettings" name="test_minio_settings_default" time="0.001" /><testcase classname="backend.tests.backend.unit.test_config.TestSettings" name="test_security_settings_default" time="0.001" /><testcase classname="backend.tests.backend.unit.test_config.TestSettings" name="test_cors_origins_default" time="0.001" /><testcase classname="backend.tests.backend.unit.test_config.TestSettings" name="test_file_upload_settings" time="0.001" /><testcase classname="backend.tests.backend.unit.test_config.TestSettings" name="test_environment_override" time="0.001" /><testcase classname="backend.tests.backend.unit.test_config.TestSettings" name="test_database_url_override" time="0.001" /><testcase classname="backend.tests.backend.unit.test_config.TestSettings" name="test_numeric_environment_override" time="0.001" /><testcase classname="backend.tests.backend.unit.test_config.TestSettings" name="test_model_configuration" time="0.001" /><testcase classname="backend.tests.backend.unit.test_config.TestSettings" name="test_background_task_timeout" time="0.001" /><testcase classname="backend.tests.backend.unit.test_database.TestDatabase" name="test_get_db_generator" time="0.000"><failure message="ModuleNotFoundError: No module named 'backend'">self = &lt;tests.backend.unit.test_database.TestDatabase object at 0x1269d8500&gt;
+
+    def test_get_db_generator(self):
+        """Test get_db yields a session and closes it"""
+&gt;       with patch("backend.app.database.SessionLocal") as mock_session_local:
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+backend/tests/backend/unit/test_database.py:25: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/anaconda3/lib/python3.12/unittest/mock.py:1447: in __enter__
+    self.target = self.getter()
+                  ^^^^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/pkgutil.py:513: in resolve_name
+    mod = importlib.import_module(modname)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+&lt;frozen importlib._bootstrap&gt;:1387: in _gcd_import
+    ???
+&lt;frozen importlib._bootstrap&gt;:1360: in _find_and_load
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'backend', import_ = &lt;function _gcd_import at 0x100cb00e0&gt;
+
+&gt;   ???
+E   ModuleNotFoundError: No module named 'backend'
+
+&lt;frozen importlib._bootstrap&gt;:1324: ModuleNotFoundError</failure></testcase><testcase classname="backend.tests.backend.unit.test_database.TestDatabase" name="test_get_db_cleanup_on_exception" time="0.000"><failure message="ModuleNotFoundError: No module named 'backend'">self = &lt;tests.backend.unit.test_database.TestDatabase object at 0x1269d86b0&gt;
+
+    def test_get_db_cleanup_on_exception(self):
+        """Test get_db closes session even on exception"""
+&gt;       with patch("backend.app.database.SessionLocal") as mock_session_local:
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+backend/tests/backend/unit/test_database.py:47: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/anaconda3/lib/python3.12/unittest/mock.py:1447: in __enter__
+    self.target = self.getter()
+                  ^^^^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/pkgutil.py:513: in resolve_name
+    mod = importlib.import_module(modname)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+&lt;frozen importlib._bootstrap&gt;:1387: in _gcd_import
+    ???
+&lt;frozen importlib._bootstrap&gt;:1360: in _find_and_load
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'backend', import_ = &lt;function _gcd_import at 0x100cb00e0&gt;
+
+&gt;   ???
+E   ModuleNotFoundError: No module named 'backend'
+
+&lt;frozen importlib._bootstrap&gt;:1324: ModuleNotFoundError</failure></testcase><testcase classname="backend.tests.backend.unit.test_database.TestDatabase" name="test_init_db_success" time="0.000"><failure message="ModuleNotFoundError: No module named 'backend'">args = (&lt;tests.backend.unit.test_database.TestDatabase object at 0x1269d8830&gt;,)
+keywargs = {}
+
+    @wraps(func)
+    def patched(*args, **keywargs):
+&gt;       with self.decoration_helper(patched,
+                                    args,
+                                    keywargs) as (newargs, newkeywargs):
+
+/opt/anaconda3/lib/python3.12/unittest/mock.py:1392: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/anaconda3/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/unittest/mock.py:1374: in decoration_helper
+    arg = exit_stack.enter_context(patching)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/contextlib.py:526: in enter_context
+    result = _enter(cm)
+             ^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/unittest/mock.py:1447: in __enter__
+    self.target = self.getter()
+                  ^^^^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/pkgutil.py:513: in resolve_name
+    mod = importlib.import_module(modname)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'backend', package = None
+
+    def import_module(name, package=None):
+        """Import a module.
+    
+        The 'package' argument is required when performing a relative import. It
+        specifies the package to use as the anchor point from which to resolve the
+        relative import to an absolute import.
+    
+        """
+        level = 0
+        if name.startswith('.'):
+            if not package:
+                raise TypeError("the 'package' argument is required to perform a "
+                                f"relative import for {name!r}")
+            for character in name:
+                if character != '.':
+                    break
+                level += 1
+&gt;       return _bootstrap._gcd_import(name[level:], package, level)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ModuleNotFoundError: No module named 'backend'
+
+/opt/anaconda3/lib/python3.12/importlib/__init__.py:90: ModuleNotFoundError</failure></testcase><testcase classname="backend.tests.backend.unit.test_database.TestDatabase" name="test_init_db_failure" time="0.000"><failure message="ModuleNotFoundError: No module named 'backend'">args = (&lt;tests.backend.unit.test_database.TestDatabase object at 0x1269d89b0&gt;,)
+keywargs = {}
+
+    @wraps(func)
+    def patched(*args, **keywargs):
+&gt;       with self.decoration_helper(patched,
+                                    args,
+                                    keywargs) as (newargs, newkeywargs):
+
+/opt/anaconda3/lib/python3.12/unittest/mock.py:1392: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/anaconda3/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/unittest/mock.py:1374: in decoration_helper
+    arg = exit_stack.enter_context(patching)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/contextlib.py:526: in enter_context
+    result = _enter(cm)
+             ^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/unittest/mock.py:1447: in __enter__
+    self.target = self.getter()
+                  ^^^^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/pkgutil.py:513: in resolve_name
+    mod = importlib.import_module(modname)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'backend', package = None
+
+    def import_module(name, package=None):
+        """Import a module.
+    
+        The 'package' argument is required when performing a relative import. It
+        specifies the package to use as the anchor point from which to resolve the
+        relative import to an absolute import.
+    
+        """
+        level = 0
+        if name.startswith('.'):
+            if not package:
+                raise TypeError("the 'package' argument is required to perform a "
+                                f"relative import for {name!r}")
+            for character in name:
+                if character != '.':
+                    break
+                level += 1
+&gt;       return _bootstrap._gcd_import(name[level:], package, level)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ModuleNotFoundError: No module named 'backend'
+
+/opt/anaconda3/lib/python3.12/importlib/__init__.py:90: ModuleNotFoundError</failure></testcase><testcase classname="backend.tests.backend.unit.test_database.TestDatabase" name="test_check_db_connection_success" time="0.000"><failure message="ModuleNotFoundError: No module named 'backend'">args = (&lt;tests.backend.unit.test_database.TestDatabase object at 0x1269d8b60&gt;,)
+keywargs = {}
+
+    @wraps(func)
+    def patched(*args, **keywargs):
+&gt;       with self.decoration_helper(patched,
+                                    args,
+                                    keywargs) as (newargs, newkeywargs):
+
+/opt/anaconda3/lib/python3.12/unittest/mock.py:1392: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/anaconda3/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/unittest/mock.py:1374: in decoration_helper
+    arg = exit_stack.enter_context(patching)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/contextlib.py:526: in enter_context
+    result = _enter(cm)
+             ^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/unittest/mock.py:1447: in __enter__
+    self.target = self.getter()
+                  ^^^^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/pkgutil.py:513: in resolve_name
+    mod = importlib.import_module(modname)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'backend', package = None
+
+    def import_module(name, package=None):
+        """Import a module.
+    
+        The 'package' argument is required when performing a relative import. It
+        specifies the package to use as the anchor point from which to resolve the
+        relative import to an absolute import.
+    
+        """
+        level = 0
+        if name.startswith('.'):
+            if not package:
+                raise TypeError("the 'package' argument is required to perform a "
+                                f"relative import for {name!r}")
+            for character in name:
+                if character != '.':
+                    break
+                level += 1
+&gt;       return _bootstrap._gcd_import(name[level:], package, level)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ModuleNotFoundError: No module named 'backend'
+
+/opt/anaconda3/lib/python3.12/importlib/__init__.py:90: ModuleNotFoundError</failure></testcase><testcase classname="backend.tests.backend.unit.test_database.TestDatabase" name="test_check_db_connection_failure" time="0.000"><failure message="ModuleNotFoundError: No module named 'backend'">args = (&lt;tests.backend.unit.test_database.TestDatabase object at 0x1269d8d10&gt;,)
+keywargs = {}
+
+    @wraps(func)
+    def patched(*args, **keywargs):
+&gt;       with self.decoration_helper(patched,
+                                    args,
+                                    keywargs) as (newargs, newkeywargs):
+
+/opt/anaconda3/lib/python3.12/unittest/mock.py:1392: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/anaconda3/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/unittest/mock.py:1374: in decoration_helper
+    arg = exit_stack.enter_context(patching)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/contextlib.py:526: in enter_context
+    result = _enter(cm)
+             ^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/unittest/mock.py:1447: in __enter__
+    self.target = self.getter()
+                  ^^^^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/pkgutil.py:513: in resolve_name
+    mod = importlib.import_module(modname)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'backend', package = None
+
+    def import_module(name, package=None):
+        """Import a module.
+    
+        The 'package' argument is required when performing a relative import. It
+        specifies the package to use as the anchor point from which to resolve the
+        relative import to an absolute import.
+    
+        """
+        level = 0
+        if name.startswith('.'):
+            if not package:
+                raise TypeError("the 'package' argument is required to perform a "
+                                f"relative import for {name!r}")
+            for character in name:
+                if character != '.':
+                    break
+                level += 1
+&gt;       return _bootstrap._gcd_import(name[level:], package, level)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ModuleNotFoundError: No module named 'backend'
+
+/opt/anaconda3/lib/python3.12/importlib/__init__.py:90: ModuleNotFoundError</failure></testcase><testcase classname="backend.tests.backend.unit.test_database.TestDatabase" name="test_base_class_exists" time="0.000" /><testcase classname="backend.tests.backend.unit.test_database.TestDatabase" name="test_engine_exists" time="0.000" /><testcase classname="backend.tests.backend.unit.test_database.TestDatabase" name="test_session_local_exists" time="0.000" /><testcase classname="backend.tests.backend.unit.test_main.TestMainApp" name="test_app_exists" time="0.000" /><testcase classname="backend.tests.backend.unit.test_main.TestMainApp" name="test_cors_middleware_configured" time="0.000" /><testcase classname="backend.tests.backend.unit.test_main.TestMainApp" name="test_lifespan_startup" time="0.002"><failure message="ModuleNotFoundError: No module named 'backend'">self = &lt;Coroutine test_lifespan_startup&gt;
+
+    def runtest(self) -&gt; None:
+        synchronized_obj = wrap_in_sync(self.obj)
+        with MonkeyPatch.context() as c:
+            c.setattr(self, "obj", synchronized_obj)
+&gt;           super().runtest()
+
+/opt/anaconda3/lib/python3.12/site-packages/pytest_asyncio/plugin.py:426: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/anaconda3/lib/python3.12/site-packages/pytest_asyncio/plugin.py:642: in inner
+    _loop.run_until_complete(task)
+/opt/anaconda3/lib/python3.12/asyncio/base_events.py:687: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/unittest/mock.py:1409: in patched
+    with self.decoration_helper(patched,
+/opt/anaconda3/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/unittest/mock.py:1374: in decoration_helper
+    arg = exit_stack.enter_context(patching)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/contextlib.py:526: in enter_context
+    result = _enter(cm)
+             ^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/unittest/mock.py:1447: in __enter__
+    self.target = self.getter()
+                  ^^^^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/pkgutil.py:513: in resolve_name
+    mod = importlib.import_module(modname)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'backend', package = None
+
+    def import_module(name, package=None):
+        """Import a module.
+    
+        The 'package' argument is required when performing a relative import. It
+        specifies the package to use as the anchor point from which to resolve the
+        relative import to an absolute import.
+    
+        """
+        level = 0
+        if name.startswith('.'):
+            if not package:
+                raise TypeError("the 'package' argument is required to perform a "
+                                f"relative import for {name!r}")
+            for character in name:
+                if character != '.':
+                    break
+                level += 1
+&gt;       return _bootstrap._gcd_import(name[level:], package, level)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ModuleNotFoundError: No module named 'backend'
+
+/opt/anaconda3/lib/python3.12/importlib/__init__.py:90: ModuleNotFoundError</failure></testcase><testcase classname="backend.tests.backend.unit.test_main.TestMainApp" name="test_lifespan_shutdown" time="0.001"><failure message="ModuleNotFoundError: No module named 'backend'">self = &lt;Coroutine test_lifespan_shutdown&gt;
+
+    def runtest(self) -&gt; None:
+        synchronized_obj = wrap_in_sync(self.obj)
+        with MonkeyPatch.context() as c:
+            c.setattr(self, "obj", synchronized_obj)
+&gt;           super().runtest()
+
+/opt/anaconda3/lib/python3.12/site-packages/pytest_asyncio/plugin.py:426: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/anaconda3/lib/python3.12/site-packages/pytest_asyncio/plugin.py:642: in inner
+    _loop.run_until_complete(task)
+/opt/anaconda3/lib/python3.12/asyncio/base_events.py:687: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/unittest/mock.py:1409: in patched
+    with self.decoration_helper(patched,
+/opt/anaconda3/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/unittest/mock.py:1374: in decoration_helper
+    arg = exit_stack.enter_context(patching)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/contextlib.py:526: in enter_context
+    result = _enter(cm)
+             ^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/unittest/mock.py:1447: in __enter__
+    self.target = self.getter()
+                  ^^^^^^^^^^^^^
+/opt/anaconda3/lib/python3.12/pkgutil.py:513: in resolve_name
+    mod = importlib.import_module(modname)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'backend', package = None
+
+    def import_module(name, package=None):
+        """Import a module.
+    
+        The 'package' argument is required when performing a relative import. It
+        specifies the package to use as the anchor point from which to resolve the
+        relative import to an absolute import.
+    
+        """
+        level = 0
+        if name.startswith('.'):
+            if not package:
+                raise TypeError("the 'package' argument is required to perform a "
+                                f"relative import for {name!r}")
+            for character in name:
+                if character != '.':
+                    break
+                level += 1
+&gt;       return _bootstrap._gcd_import(name[level:], package, level)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ModuleNotFoundError: No module named 'backend'
+
+/opt/anaconda3/lib/python3.12/importlib/__init__.py:90: ModuleNotFoundError</failure></testcase><testcase classname="backend.tests.backend.unit.test_main.TestMainApp" name="test_health_endpoint_exists" time="0.000"><failure message="AssertionError: assert '/health' in ['/openapi.json', '/docs', '/docs/oauth2-redirect', '/redoc', '/health/', '/health/ready', ...]">self = &lt;tests.backend.unit.test_main.TestMainApp object at 0x1269da4e0&gt;
+
+    def test_health_endpoint_exists(self):
+        """Test health endpoint is registered"""
+        routes = [route.path for route in app.routes]
+&gt;       assert "/health" in routes
+E       AssertionError: assert '/health' in ['/openapi.json', '/docs', '/docs/oauth2-redirect', '/redoc', '/health/', '/health/ready', ...]
+
+backend/tests/backend/unit/test_main.py:70: AssertionError</failure></testcase><testcase classname="backend.tests.backend.unit.test_main.TestMainApp" name="test_root_endpoint_exists" time="0.000" /><testcase classname="backend.tests.backend.unit.test_main.TestHealthEndpoint" name="test_health_check_response" time="0.867"><failure message="AssertionError: assert 'degraded' == 'healthy'&#10;  &#10;  - healthy&#10;  + degraded">self = &lt;tests.backend.unit.test_main.TestHealthEndpoint object at 0x1269daa20&gt;
+
+    @patch.dict(os.environ, {"MOCK_MODE": "true", "USE_LOCAL_MODEL": "false"})
+    def test_health_check_response(self):
+        """Test health check returns correct response"""
+        response = self.client.get("/health")
+    
+        assert response.status_code == 200
+        data = response.json()
+    
+&gt;       assert data["status"] == "healthy"
+E       AssertionError: assert 'degraded' == 'healthy'
+E         
+E         - healthy
+E         + degraded
+
+backend/tests/backend/unit/test_main.py:93: AssertionError</failure></testcase><testcase classname="backend.tests.backend.unit.test_main.TestHealthEndpoint" name="test_health_check_different_config" time="1.042"><failure message="KeyError: 'mock_mode'">self = &lt;tests.backend.unit.test_main.TestHealthEndpoint object at 0x1269dac00&gt;
+
+    @patch.dict(os.environ, {"MOCK_MODE": "false", "USE_LOCAL_MODEL": "true"})
+    def test_health_check_different_config(self):
+        """Test health check with different configuration"""
+        response = self.client.get("/health")
+    
+        assert response.status_code == 200
+        data = response.json()
+    
+&gt;       assert not data["mock_mode"]
+                   ^^^^^^^^^^^^^^^^^
+E       KeyError: 'mock_mode'
+
+backend/tests/backend/unit/test_main.py:107: KeyError</failure></testcase><testcase classname="backend.tests.backend.unit.test_main.TestRootEndpoint" name="test_root_response" time="0.005" /><testcase classname="backend.tests.backend.unit.test_main.TestRootEndpoint" name="test_root_response_structure" time="0.003" /><testcase classname="backend.tests.backend.unit.test_main.TestAPIDocumentation" name="test_openapi_schema_endpoint" time="0.002" /><testcase classname="backend.tests.backend.unit.test_main.TestAPIDocumentation" name="test_swagger_ui_endpoint" time="0.003" /><testcase classname="backend.tests.backend.unit.test_main.TestAPIDocumentation" name="test_redoc_endpoint" time="0.002" /><testcase classname="backend.tests.test_simple.TestProjectStructure" name="test_backend_directory_exists" time="0.000"><failure message="AssertionError: assert False&#10; +  where False = &lt;function exists at 0x100cfb6a0&gt;('/Users/clayka7/Documents/OSSGF/backend/tests/../backend')&#10; +    where &lt;function exists at 0x100cfb6a0&gt; = &lt;module 'posixpath' (frozen)&gt;.exists&#10; +      where &lt;module 'posixpath' (frozen)&gt; = os.path">self = &lt;tests.test_simple.TestProjectStructure object at 0x1269fc320&gt;
+
+    def test_backend_directory_exists(self):
+        """Test backend directory exists"""
+        backend_path = os.path.join(os.path.dirname(__file__), "..", "backend")
+&gt;       assert os.path.exists(backend_path)
+E       AssertionError: assert False
+E        +  where False = &lt;function exists at 0x100cfb6a0&gt;('/Users/clayka7/Documents/OSSGF/backend/tests/../backend')
+E        +    where &lt;function exists at 0x100cfb6a0&gt; = &lt;module 'posixpath' (frozen)&gt;.exists
+E        +      where &lt;module 'posixpath' (frozen)&gt; = os.path
+
+backend/tests/test_simple.py:18: AssertionError</failure></testcase><testcase classname="backend.tests.test_simple.TestProjectStructure" name="test_frontend_directory_exists" time="0.000"><failure message="AssertionError: assert False&#10; +  where False = &lt;function exists at 0x100cfb6a0&gt;('/Users/clayka7/Documents/OSSGF/backend/tests/../frontend')&#10; +    where &lt;function exists at 0x100cfb6a0&gt; = &lt;module 'posixpath' (frozen)&gt;.exists&#10; +      where &lt;module 'posixpath' (frozen)&gt; = os.path">self = &lt;tests.test_simple.TestProjectStructure object at 0x1269db350&gt;
+
+    def test_frontend_directory_exists(self):
+        """Test frontend directory exists"""
+        frontend_path = os.path.join(os.path.dirname(__file__), "..", "frontend")
+&gt;       assert os.path.exists(frontend_path)
+E       AssertionError: assert False
+E        +  where False = &lt;function exists at 0x100cfb6a0&gt;('/Users/clayka7/Documents/OSSGF/backend/tests/../frontend')
+E        +    where &lt;function exists at 0x100cfb6a0&gt; = &lt;module 'posixpath' (frozen)&gt;.exists
+E        +      where &lt;module 'posixpath' (frozen)&gt; = os.path
+
+backend/tests/test_simple.py:24: AssertionError</failure></testcase><testcase classname="backend.tests.test_simple.TestProjectStructure" name="test_docker_compose_exists" time="0.000"><failure message="AssertionError: assert False&#10; +  where False = &lt;function exists at 0x100cfb6a0&gt;('/Users/clayka7/Documents/OSSGF/backend/tests/../docker-compose.yml')&#10; +    where &lt;function exists at 0x100cfb6a0&gt; = &lt;module 'posixpath' (frozen)&gt;.exists&#10; +      where &lt;module 'posixpath' (frozen)&gt; = os.path">self = &lt;tests.test_simple.TestProjectStructure object at 0x1269dab10&gt;
+
+    def test_docker_compose_exists(self):
+        """Test docker-compose.yml exists"""
+        docker_compose_path = os.path.join(os.path.dirname(__file__), "..", "docker-compose.yml")
+&gt;       assert os.path.exists(docker_compose_path)
+E       AssertionError: assert False
+E        +  where False = &lt;function exists at 0x100cfb6a0&gt;('/Users/clayka7/Documents/OSSGF/backend/tests/../docker-compose.yml')
+E        +    where &lt;function exists at 0x100cfb6a0&gt; = &lt;module 'posixpath' (frozen)&gt;.exists
+E        +      where &lt;module 'posixpath' (frozen)&gt; = os.path
+
+backend/tests/test_simple.py:30: AssertionError</failure></testcase><testcase classname="backend.tests.test_simple.TestProjectStructure" name="test_requirements_files_exist" time="0.000"><failure message="AssertionError: assert False&#10; +  where False = &lt;function exists at 0x100cfb6a0&gt;('/Users/clayka7/Documents/OSSGF/backend/tests/../backend/requirements.txt')&#10; +    where &lt;function exists at 0x100cfb6a0&gt; = &lt;module 'posixpath' (frozen)&gt;.exists&#10; +      where &lt;module 'posixpath' (frozen)&gt; = os.path">self = &lt;tests.test_simple.TestProjectStructure object at 0x1269da420&gt;
+
+    def test_requirements_files_exist(self):
+        """Test requirements files exist"""
+        req_path = os.path.join(os.path.dirname(__file__), "..", "backend", "requirements.txt")
+        req_dev_path = os.path.join(
+            os.path.dirname(__file__), "..", "backend", "requirements-dev.txt"
+        )
+    
+&gt;       assert os.path.exists(req_path)
+E       AssertionError: assert False
+E        +  where False = &lt;function exists at 0x100cfb6a0&gt;('/Users/clayka7/Documents/OSSGF/backend/tests/../backend/requirements.txt')
+E        +    where &lt;function exists at 0x100cfb6a0&gt; = &lt;module 'posixpath' (frozen)&gt;.exists
+E        +      where &lt;module 'posixpath' (frozen)&gt; = os.path
+
+backend/tests/test_simple.py:40: AssertionError</failure></testcase><testcase classname="backend.tests.test_simple.TestProjectStructure" name="test_gitignore_exists" time="0.000"><failure message="AssertionError: assert False&#10; +  where False = &lt;function exists at 0x100cfb6a0&gt;('/Users/clayka7/Documents/OSSGF/backend/tests/../backend/.gitignore')&#10; +    where &lt;function exists at 0x100cfb6a0&gt; = &lt;module 'posixpath' (frozen)&gt;.exists&#10; +      where &lt;module 'posixpath' (frozen)&gt; = os.path">self = &lt;tests.test_simple.TestProjectStructure object at 0x1269d8860&gt;
+
+    def test_gitignore_exists(self):
+        """Test .gitignore files exist"""
+        root_gitignore = os.path.join(os.path.dirname(__file__), "..", ".gitignore")
+        backend_gitignore = os.path.join(os.path.dirname(__file__), "..", "backend", ".gitignore")
+        frontend_gitignore = os.path.join(os.path.dirname(__file__), "..", "frontend", ".gitignore")
+    
+        assert os.path.exists(root_gitignore)
+&gt;       assert os.path.exists(backend_gitignore)
+E       AssertionError: assert False
+E        +  where False = &lt;function exists at 0x100cfb6a0&gt;('/Users/clayka7/Documents/OSSGF/backend/tests/../backend/.gitignore')
+E        +    where &lt;function exists at 0x100cfb6a0&gt; = &lt;module 'posixpath' (frozen)&gt;.exists
+E        +      where &lt;module 'posixpath' (frozen)&gt; = os.path
+
+backend/tests/test_simple.py:50: AssertionError</failure></testcase><testcase classname="backend.tests.test_simple.TestProjectStructure" name="test_ci_workflow_exists" time="0.000"><failure message="AssertionError: assert False&#10; +  where False = &lt;function exists at 0x100cfb6a0&gt;('/Users/clayka7/Documents/OSSGF/backend/tests/../.github/workflows/ci.yml')&#10; +    where &lt;function exists at 0x100cfb6a0&gt; = &lt;module 'posixpath' (frozen)&gt;.exists&#10; +      where &lt;module 'posixpath' (frozen)&gt; = os.path">self = &lt;tests.test_simple.TestProjectStructure object at 0x1269fc110&gt;
+
+    def test_ci_workflow_exists(self):
+        """Test CI workflow file exists"""
+        ci_path = os.path.join(os.path.dirname(__file__), "..", ".github", "workflows", "ci.yml")
+&gt;       assert os.path.exists(ci_path)
+E       AssertionError: assert False
+E        +  where False = &lt;function exists at 0x100cfb6a0&gt;('/Users/clayka7/Documents/OSSGF/backend/tests/../.github/workflows/ci.yml')
+E        +    where &lt;function exists at 0x100cfb6a0&gt; = &lt;module 'posixpath' (frozen)&gt;.exists
+E        +      where &lt;module 'posixpath' (frozen)&gt; = os.path
+
+backend/tests/test_simple.py:56: AssertionError</failure></testcase><testcase classname="backend.tests.test_simple.TestProjectStructure" name="test_readme_exists" time="0.000"><failure message="AssertionError: assert False&#10; +  where False = &lt;function exists at 0x100cfb6a0&gt;('/Users/clayka7/Documents/OSSGF/backend/tests/../README.md')&#10; +    where &lt;function exists at 0x100cfb6a0&gt; = &lt;module 'posixpath' (frozen)&gt;.exists&#10; +      where &lt;module 'posixpath' (frozen)&gt; = os.path">self = &lt;tests.test_simple.TestProjectStructure object at 0x1269fc4d0&gt;
+
+    def test_readme_exists(self):
+        """Test README.md exists"""
+        readme_path = os.path.join(os.path.dirname(__file__), "..", "README.md")
+&gt;       assert os.path.exists(readme_path)
+E       AssertionError: assert False
+E        +  where False = &lt;function exists at 0x100cfb6a0&gt;('/Users/clayka7/Documents/OSSGF/backend/tests/../README.md')
+E        +    where &lt;function exists at 0x100cfb6a0&gt; = &lt;module 'posixpath' (frozen)&gt;.exists
+E        +      where &lt;module 'posixpath' (frozen)&gt; = os.path
+
+backend/tests/test_simple.py:62: AssertionError</failure></testcase><testcase classname="backend.tests.test_simple.TestProjectStructure" name="test_license_exists" time="0.000"><failure message="AssertionError: assert False&#10; +  where False = &lt;function exists at 0x100cfb6a0&gt;('/Users/clayka7/Documents/OSSGF/backend/tests/../LICENSE')&#10; +    where &lt;function exists at 0x100cfb6a0&gt; = &lt;module 'posixpath' (frozen)&gt;.exists&#10; +      where &lt;module 'posixpath' (frozen)&gt; = os.path">self = &lt;tests.test_simple.TestProjectStructure object at 0x1269fc680&gt;
+
+    def test_license_exists(self):
+        """Test LICENSE file exists"""
+        license_path = os.path.join(os.path.dirname(__file__), "..", "LICENSE")
+&gt;       assert os.path.exists(license_path)
+E       AssertionError: assert False
+E        +  where False = &lt;function exists at 0x100cfb6a0&gt;('/Users/clayka7/Documents/OSSGF/backend/tests/../LICENSE')
+E        +    where &lt;function exists at 0x100cfb6a0&gt; = &lt;module 'posixpath' (frozen)&gt;.exists
+E        +      where &lt;module 'posixpath' (frozen)&gt; = os.path
+
+backend/tests/test_simple.py:73: AssertionError</failure></testcase><testcase classname="backend.tests.test_simple.TestProjectStructure" name="test_demo_scripts_exist" time="0.000"><failure message="AssertionError: assert False&#10; +  where False = &lt;function exists at 0x100cfb6a0&gt;('/Users/clayka7/Documents/OSSGF/backend/tests/../run_demo.sh')&#10; +    where &lt;function exists at 0x100cfb6a0&gt; = &lt;module 'posixpath' (frozen)&gt;.exists&#10; +      where &lt;module 'posixpath' (frozen)&gt; = os.path">self = &lt;tests.test_simple.TestProjectStructure object at 0x1269fc830&gt;
+
+    def test_demo_scripts_exist(self):
+        """Test demo scripts exist"""
+        demo_sh = os.path.join(os.path.dirname(__file__), "..", "run_demo.sh")
+        demo_ps1 = os.path.join(os.path.dirname(__file__), "..", "run_demo.ps1")
+    
+&gt;       assert os.path.exists(demo_sh)
+E       AssertionError: assert False
+E        +  where False = &lt;function exists at 0x100cfb6a0&gt;('/Users/clayka7/Documents/OSSGF/backend/tests/../run_demo.sh')
+E        +    where &lt;function exists at 0x100cfb6a0&gt; = &lt;module 'posixpath' (frozen)&gt;.exists
+E        +      where &lt;module 'posixpath' (frozen)&gt; = os.path
+
+backend/tests/test_simple.py:85: AssertionError</failure></testcase><testcase classname="backend.tests.test_simple.TestProjectStructure" name="test_makefile_exists" time="0.000"><failure message="AssertionError: assert False&#10; +  where False = &lt;function exists at 0x100cfb6a0&gt;('/Users/clayka7/Documents/OSSGF/backend/tests/../Makefile')&#10; +    where &lt;function exists at 0x100cfb6a0&gt; = &lt;module 'posixpath' (frozen)&gt;.exists&#10; +      where &lt;module 'posixpath' (frozen)&gt; = os.path">self = &lt;tests.test_simple.TestProjectStructure object at 0x1269fc9e0&gt;
+
+    def test_makefile_exists(self):
+        """Test Makefile exists"""
+        makefile_path = os.path.join(os.path.dirname(__file__), "..", "Makefile")
+&gt;       assert os.path.exists(makefile_path)
+E       AssertionError: assert False
+E        +  where False = &lt;function exists at 0x100cfb6a0&gt;('/Users/clayka7/Documents/OSSGF/backend/tests/../Makefile')
+E        +    where &lt;function exists at 0x100cfb6a0&gt; = &lt;module 'posixpath' (frozen)&gt;.exists
+E        +      where &lt;module 'posixpath' (frozen)&gt; = os.path
+
+backend/tests/test_simple.py:94: AssertionError</failure></testcase><testcase classname="backend.tests.test_simple.TestProjectStructure" name="test_pre_commit_config_exists" time="0.000"><failure message="AssertionError: assert False&#10; +  where False = &lt;function exists at 0x100cfb6a0&gt;('/Users/clayka7/Documents/OSSGF/backend/tests/../.pre-commit-config.yaml')&#10; +    where &lt;function exists at 0x100cfb6a0&gt; = &lt;module 'posixpath' (frozen)&gt;.exists&#10; +      where &lt;module 'posixpath' (frozen)&gt; = os.path">self = &lt;tests.test_simple.TestProjectStructure object at 0x1269fcb90&gt;
+
+    def test_pre_commit_config_exists(self):
+        """Test pre-commit configuration exists"""
+        pre_commit_path = os.path.join(os.path.dirname(__file__), "..", ".pre-commit-config.yaml")
+&gt;       assert os.path.exists(pre_commit_path)
+E       AssertionError: assert False
+E        +  where False = &lt;function exists at 0x100cfb6a0&gt;('/Users/clayka7/Documents/OSSGF/backend/tests/../.pre-commit-config.yaml')
+E        +    where &lt;function exists at 0x100cfb6a0&gt; = &lt;module 'posixpath' (frozen)&gt;.exists
+E        +      where &lt;module 'posixpath' (frozen)&gt; = os.path
+
+backend/tests/test_simple.py:106: AssertionError</failure></testcase><testcase classname="backend.tests.test_simple.TestProjectStructure" name="test_pyproject_toml_exists" time="0.000"><failure message="AssertionError: assert False&#10; +  where False = &lt;function exists at 0x100cfb6a0&gt;('/Users/clayka7/Documents/OSSGF/backend/tests/../pyproject.toml')&#10; +    where &lt;function exists at 0x100cfb6a0&gt; = &lt;module 'posixpath' (frozen)&gt;.exists&#10; +      where &lt;module 'posixpath' (frozen)&gt; = os.path">self = &lt;tests.test_simple.TestProjectStructure object at 0x1269fcd40&gt;
+
+    def test_pyproject_toml_exists(self):
+        """Test pyproject.toml exists"""
+        pyproject_path = os.path.join(os.path.dirname(__file__), "..", "pyproject.toml")
+&gt;       assert os.path.exists(pyproject_path)
+E       AssertionError: assert False
+E        +  where False = &lt;function exists at 0x100cfb6a0&gt;('/Users/clayka7/Documents/OSSGF/backend/tests/../pyproject.toml')
+E        +    where &lt;function exists at 0x100cfb6a0&gt; = &lt;module 'posixpath' (frozen)&gt;.exists
+E        +      where &lt;module 'posixpath' (frozen)&gt; = os.path
+
+backend/tests/test_simple.py:111: AssertionError</failure></testcase><testcase classname="backend.tests.test_simple.TestBackendStructure" name="test_main_app_file_exists" time="0.000"><failure message="AssertionError: assert False&#10; +  where False = &lt;function exists at 0x100cfb6a0&gt;('/Users/clayka7/Documents/OSSGF/backend/tests/../backend/app/main.py')&#10; +    where &lt;function exists at 0x100cfb6a0&gt; = &lt;module 'posixpath' (frozen)&gt;.exists&#10; +      where &lt;module 'posixpath' (frozen)&gt; = os.path">self = &lt;tests.test_simple.TestBackendStructure object at 0x1269fcf50&gt;
+
+    def test_main_app_file_exists(self):
+        """Test main.py exists"""
+        main_path = os.path.join(os.path.dirname(__file__), "..", "backend", "app", "main.py")
+&gt;       assert os.path.exists(main_path)
+E       AssertionError: assert False
+E        +  where False = &lt;function exists at 0x100cfb6a0&gt;('/Users/clayka7/Documents/OSSGF/backend/tests/../backend/app/main.py')
+E        +    where &lt;function exists at 0x100cfb6a0&gt; = &lt;module 'posixpath' (frozen)&gt;.exists
+E        +      where &lt;module 'posixpath' (frozen)&gt; = os.path
+
+backend/tests/test_simple.py:127: AssertionError</failure></testcase><testcase classname="backend.tests.test_simple.TestBackendStructure" name="test_config_file_exists" time="0.000"><failure message="AssertionError: assert False&#10; +  where False = &lt;function exists at 0x100cfb6a0&gt;('/Users/clayka7/Documents/OSSGF/backend/tests/../backend/app/config.py')&#10; +    where &lt;function exists at 0x100cfb6a0&gt; = &lt;module 'posixpath' (frozen)&gt;.exists&#10; +      where &lt;module 'posixpath' (frozen)&gt; = os.path">self = &lt;tests.test_simple.TestBackendStructure object at 0x1269fd100&gt;
+
+    def test_config_file_exists(self):
+        """Test config.py exists"""
+        config_path = os.path.join(os.path.dirname(__file__), "..", "backend", "app", "config.py")
+&gt;       assert os.path.exists(config_path)
+E       AssertionError: assert False
+E        +  where False = &lt;function exists at 0x100cfb6a0&gt;('/Users/clayka7/Documents/OSSGF/backend/tests/../backend/app/config.py')
+E        +    where &lt;function exists at 0x100cfb6a0&gt; = &lt;module 'posixpath' (frozen)&gt;.exists
+E        +      where &lt;module 'posixpath' (frozen)&gt; = os.path
+
+backend/tests/test_simple.py:132: AssertionError</failure></testcase><testcase classname="backend.tests.test_simple.TestBackendStructure" name="test_database_file_exists" time="0.000"><failure message="AssertionError: assert False&#10; +  where False = &lt;function exists at 0x100cfb6a0&gt;('/Users/clayka7/Documents/OSSGF/backend/tests/../backend/app/database.py')&#10; +    where &lt;function exists at 0x100cfb6a0&gt; = &lt;module 'posixpath' (frozen)&gt;.exists&#10; +      where &lt;module 'posixpath' (frozen)&gt; = os.path">self = &lt;tests.test_simple.TestBackendStructure object at 0x1269fd2b0&gt;
+
+    def test_database_file_exists(self):
+        """Test database.py exists"""
+        db_path = os.path.join(os.path.dirname(__file__), "..", "backend", "app", "database.py")
+&gt;       assert os.path.exists(db_path)
+E       AssertionError: assert False
+E        +  where False = &lt;function exists at 0x100cfb6a0&gt;('/Users/clayka7/Documents/OSSGF/backend/tests/../backend/app/database.py')
+E        +    where &lt;function exists at 0x100cfb6a0&gt; = &lt;module 'posixpath' (frozen)&gt;.exists
+E        +      where &lt;module 'posixpath' (frozen)&gt; = os.path
+
+backend/tests/test_simple.py:137: AssertionError</failure></testcase><testcase classname="backend.tests.test_simple.TestBackendStructure" name="test_dockerfile_exists" time="0.000"><failure message="AssertionError: assert False&#10; +  where False = &lt;function exists at 0x100cfb6a0&gt;('/Users/clayka7/Documents/OSSGF/backend/tests/../backend/Dockerfile')&#10; +    where &lt;function exists at 0x100cfb6a0&gt; = &lt;module 'posixpath' (frozen)&gt;.exists&#10; +      where &lt;module 'posixpath' (frozen)&gt; = os.path">self = &lt;tests.test_simple.TestBackendStructure object at 0x1269fd460&gt;
+
+    def test_dockerfile_exists(self):
+        """Test Dockerfile exists"""
+        dockerfile_path = os.path.join(os.path.dirname(__file__), "..", "backend", "Dockerfile")
+&gt;       assert os.path.exists(dockerfile_path)
+E       AssertionError: assert False
+E        +  where False = &lt;function exists at 0x100cfb6a0&gt;('/Users/clayka7/Documents/OSSGF/backend/tests/../backend/Dockerfile')
+E        +    where &lt;function exists at 0x100cfb6a0&gt; = &lt;module 'posixpath' (frozen)&gt;.exists
+E        +      where &lt;module 'posixpath' (frozen)&gt; = os.path
+
+backend/tests/test_simple.py:142: AssertionError</failure></testcase><testcase classname="backend.tests.test_simple.TestBackendStructure" name="test_init_files_exist" time="0.000"><failure message="AssertionError: assert False&#10; +  where False = &lt;function exists at 0x100cfb6a0&gt;('/Users/clayka7/Documents/OSSGF/backend/tests/../backend/app/__init__.py')&#10; +    where &lt;function exists at 0x100cfb6a0&gt; = &lt;module 'posixpath' (frozen)&gt;.exists&#10; +      where &lt;module 'posixpath' (frozen)&gt; = os.path">self = &lt;tests.test_simple.TestBackendStructure object at 0x1269fd610&gt;
+
+    def test_init_files_exist(self):
+        """Test __init__.py files exist in packages"""
+        app_init = os.path.join(os.path.dirname(__file__), "..", "backend", "app", "__init__.py")
+        routers_init = os.path.join(
+            os.path.dirname(__file__), "..", "backend", "app", "routers", "__init__.py"
+        )
+        services_init = os.path.join(
+            os.path.dirname(__file__), "..", "backend", "app", "services", "__init__.py"
+        )
+    
+&gt;       assert os.path.exists(app_init)
+E       AssertionError: assert False
+E        +  where False = &lt;function exists at 0x100cfb6a0&gt;('/Users/clayka7/Documents/OSSGF/backend/tests/../backend/app/__init__.py')
+E        +    where &lt;function exists at 0x100cfb6a0&gt; = &lt;module 'posixpath' (frozen)&gt;.exists
+E        +      where &lt;module 'posixpath' (frozen)&gt; = os.path
+
+backend/tests/test_simple.py:154: AssertionError</failure></testcase><testcase classname="backend.tests.test_simple.TestDocumentation" name="test_contributing_guide_exists" time="0.000"><failure message="AssertionError: assert False&#10; +  where False = &lt;function exists at 0x100cfb6a0&gt;('/Users/clayka7/Documents/OSSGF/backend/tests/../CONTRIBUTING.md')&#10; +    where &lt;function exists at 0x100cfb6a0&gt; = &lt;module 'posixpath' (frozen)&gt;.exists&#10; +      where &lt;module 'posixpath' (frozen)&gt; = os.path">self = &lt;tests.test_simple.TestDocumentation object at 0x1269fd850&gt;
+
+    def test_contributing_guide_exists(self):
+        """Test CONTRIBUTING.md exists"""
+        contributing_path = os.path.join(os.path.dirname(__file__), "..", "CONTRIBUTING.md")
+&gt;       assert os.path.exists(contributing_path)
+E       AssertionError: assert False
+E        +  where False = &lt;function exists at 0x100cfb6a0&gt;('/Users/clayka7/Documents/OSSGF/backend/tests/../CONTRIBUTING.md')
+E        +    where &lt;function exists at 0x100cfb6a0&gt; = &lt;module 'posixpath' (frozen)&gt;.exists
+E        +      where &lt;module 'posixpath' (frozen)&gt; = os.path
+
+backend/tests/test_simple.py:165: AssertionError</failure></testcase><testcase classname="backend.tests.test_simple.TestDocumentation" name="test_claude_md_exists" time="0.000"><failure message="AssertionError: assert False&#10; +  where False = &lt;function exists at 0x100cfb6a0&gt;('/Users/clayka7/Documents/OSSGF/backend/tests/../CLAUDE.md')&#10; +    where &lt;function exists at 0x100cfb6a0&gt; = &lt;module 'posixpath' (frozen)&gt;.exists&#10; +      where &lt;module 'posixpath' (frozen)&gt; = os.path">self = &lt;tests.test_simple.TestDocumentation object at 0x1269fda00&gt;
+
+    def test_claude_md_exists(self):
+        """Test CLAUDE.md exists"""
+        claude_path = os.path.join(os.path.dirname(__file__), "..", "CLAUDE.md")
+&gt;       assert os.path.exists(claude_path)
+E       AssertionError: assert False
+E        +  where False = &lt;function exists at 0x100cfb6a0&gt;('/Users/clayka7/Documents/OSSGF/backend/tests/../CLAUDE.md')
+E        +    where &lt;function exists at 0x100cfb6a0&gt; = &lt;module 'posixpath' (frozen)&gt;.exists
+E        +      where &lt;module 'posixpath' (frozen)&gt; = os.path
+
+backend/tests/test_simple.py:176: AssertionError</failure></testcase><testcase classname="backend.tests.test_simple.TestDocumentation" name="test_roadmap_exists" time="0.000"><failure message="AssertionError: assert False&#10; +  where False = &lt;function exists at 0x100cfb6a0&gt;('/Users/clayka7/Documents/OSSGF/backend/tests/../ROADMAP.md')&#10; +    where &lt;function exists at 0x100cfb6a0&gt; = &lt;module 'posixpath' (frozen)&gt;.exists&#10; +      where &lt;module 'posixpath' (frozen)&gt; = os.path">self = &lt;tests.test_simple.TestDocumentation object at 0x1269fdbb0&gt;
+
+    def test_roadmap_exists(self):
+        """Test ROADMAP.md exists"""
+        roadmap_path = os.path.join(os.path.dirname(__file__), "..", "ROADMAP.md")
+&gt;       assert os.path.exists(roadmap_path)
+E       AssertionError: assert False
+E        +  where False = &lt;function exists at 0x100cfb6a0&gt;('/Users/clayka7/Documents/OSSGF/backend/tests/../ROADMAP.md')
+E        +    where &lt;function exists at 0x100cfb6a0&gt; = &lt;module 'posixpath' (frozen)&gt;.exists
+E        +      where &lt;module 'posixpath' (frozen)&gt; = os.path
+
+backend/tests/test_simple.py:187: AssertionError</failure></testcase><testcase classname="backend.tests.test_simple.TestDocumentation" name="test_github_templates_exist" time="0.000"><failure message="AssertionError: assert False&#10; +  where False = &lt;function exists at 0x100cfb6a0&gt;('/Users/clayka7/Documents/OSSGF/backend/tests/../.github/pull_request_template.md')&#10; +    where &lt;function exists at 0x100cfb6a0&gt; = &lt;module 'posixpath' (frozen)&gt;.exists&#10; +      where &lt;module 'posixpath' (frozen)&gt; = os.path">self = &lt;tests.test_simple.TestDocumentation object at 0x1269fdd60&gt;
+
+    def test_github_templates_exist(self):
+        """Test GitHub templates exist"""
+        pr_template = os.path.join(
+            os.path.dirname(__file__), "..", ".github", "pull_request_template.md"
+        )
+        bug_template = os.path.join(
+            os.path.dirname(__file__), "..", ".github", "ISSUE_TEMPLATE", "bug_report.md"
+        )
+        feature_template = os.path.join(
+            os.path.dirname(__file__), "..", ".github", "ISSUE_TEMPLATE", "feature_request.md"
+        )
+    
+&gt;       assert os.path.exists(pr_template)
+E       AssertionError: assert False
+E        +  where False = &lt;function exists at 0x100cfb6a0&gt;('/Users/clayka7/Documents/OSSGF/backend/tests/../.github/pull_request_template.md')
+E        +    where &lt;function exists at 0x100cfb6a0&gt; = &lt;module 'posixpath' (frozen)&gt;.exists
+E        +      where &lt;module 'posixpath' (frozen)&gt; = os.path
+
+backend/tests/test_simple.py:207: AssertionError</failure></testcase><testcase classname="backend.tests.test_simple.TestEnvironmentFiles" name="test_env_example_exists" time="0.000"><failure message="AssertionError: assert False&#10; +  where False = &lt;function exists at 0x100cfb6a0&gt;('/Users/clayka7/Documents/OSSGF/backend/tests/../.env.example')&#10; +    where &lt;function exists at 0x100cfb6a0&gt; = &lt;module 'posixpath' (frozen)&gt;.exists&#10; +      where &lt;module 'posixpath' (frozen)&gt; = os.path">self = &lt;tests.test_simple.TestEnvironmentFiles object at 0x1269fdfa0&gt;
+
+    def test_env_example_exists(self):
+        """Test .env.example exists"""
+        env_example_path = os.path.join(os.path.dirname(__file__), "..", ".env.example")
+&gt;       assert os.path.exists(env_example_path)
+E       AssertionError: assert False
+E        +  where False = &lt;function exists at 0x100cfb6a0&gt;('/Users/clayka7/Documents/OSSGF/backend/tests/../.env.example')
+E        +    where &lt;function exists at 0x100cfb6a0&gt; = &lt;module 'posixpath' (frozen)&gt;.exists
+E        +      where &lt;module 'posixpath' (frozen)&gt; = os.path
+
+backend/tests/test_simple.py:218: AssertionError</failure></testcase><testcase classname="backend.tests.test_simple.TestTaskFiles" name="test_all_task_files_exist" time="0.000"><failure message="AssertionError: Missing task file: task1.1.md&#10;assert False&#10; +  where False = &lt;function exists at 0x100cfb6a0&gt;('/Users/clayka7/Documents/OSSGF/backend/tests/../tasks/task1.1.md')&#10; +    where &lt;function exists at 0x100cfb6a0&gt; = &lt;module 'posixpath' (frozen)&gt;.exists&#10; +      where &lt;module 'posixpath' (frozen)&gt; = os.path">self = &lt;tests.test_simple.TestTaskFiles object at 0x1269fe1b0&gt;
+
+    def test_all_task_files_exist(self):
+        """Test all task files exist"""
+        tasks_dir = os.path.join(os.path.dirname(__file__), "..", "tasks")
+    
+        expected_tasks = [
+            "task1.1.md",
+            "task1.2.md",
+            "task1.3.md",
+            "task2.1.md",
+            "task2.2.md",
+            "task2.3.md",
+            "task3.1&amp;3.2.md",
+            "task3.3.md",
+            "task4.1.md",
+            "task4.2.md",
+            "task4.3.md",
+            "task4.4.md",
+            "task5.1.md",
+            "task5.2.md",
+            "task5.3.md",
+        ]
+    
+        for task_file in expected_tasks:
+            task_path = os.path.join(tasks_dir, task_file)
+&gt;           assert os.path.exists(task_path), f"Missing task file: {task_file}"
+E           AssertionError: Missing task file: task1.1.md
+E           assert False
+E            +  where False = &lt;function exists at 0x100cfb6a0&gt;('/Users/clayka7/Documents/OSSGF/backend/tests/../tasks/task1.1.md')
+E            +    where &lt;function exists at 0x100cfb6a0&gt; = &lt;module 'posixpath' (frozen)&gt;.exists
+E            +      where &lt;module 'posixpath' (frozen)&gt; = os.path
+
+backend/tests/test_simple.py:255: AssertionError</failure></testcase></testsuite></testsuites>
