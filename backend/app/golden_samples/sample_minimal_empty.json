@@ -1,0 +1,40 @@
+{
+  "id": "scene_minimal_empty_001",
+  "scene_name": "Minimal Empty Scene",
+  "description": "Tests handling of scenes with no entities or minimal content",
+  "style": "sandbox",
+  "metadata": {
+    "width": 800,
+    "height": 600,
+    "background_color": "#000000",
+    "version": "1.0.0",
+    "created_for": "edge_case_testing",
+    "test_purpose": "empty_entities_handling"
+  },
+  "entities": [],
+  "global_settings": {
+    "physics": {
+      "gravity": {"x": 0, "y": 0},
+      "enabled": false
+    },
+    "rendering": {
+      "antialiasing": false,
+      "shadows": false
+    }
+  },
+  "validation": {
+    "allow_empty": true,
+    "minimum_entities": 0,
+    "fallback_behavior": "render_empty_canvas"
+  },
+  "comments": {
+    "purpose": "This golden sample tests the system's ability to handle edge cases where no entities are present",
+    "expected_behavior": "The system should gracefully handle empty scenes without errors",
+    "use_cases": [
+      "Sandbox mode initialization",
+      "Clean slate for user creation",
+      "Testing renderer with no objects",
+      "Validation of minimal scene requirements"
+    ]
+  }
+}

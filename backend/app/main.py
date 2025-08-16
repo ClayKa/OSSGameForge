@@ -6,7 +6,10 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 import logging
-import os
+
+from .config import settings
+from .database import init_db
+from .routers import projects, assets, generation, export, health
 
 # Configure logging
 logging.basicConfig(
@@ -15,9 +18,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Import routers (will be added as we develop)
-# from .routers import health, assets, generation, export
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """
@@ -25,8 +25,20 @@ async def lifespan(app: FastAPI):
     """
     # Startup
     logger.info("Starting OSSGameForge Backend...")
-    logger.info(f"Mock Mode: {os.getenv('MOCK_MODE', 'false')}")
-    logger.info(f"Local Model: {os.getenv('USE_LOCAL_MODEL', 'false')}")
+    logger.info(f"Mock Mode: {settings.mock_mode}")
+    logger.info(f"Local Model: {settings.use_local_model}")
+    
+    # Initialize database tables if not in mock mode
+    if not settings.mock_mode:
+        try:
+            init_db()
+            logger.info("Database initialized successfully")
+        except Exception as e:
+            logger.error(f"Failed to initialize database: {e}")
+            # Continue anyway in development, but in production this should fail
+            if not settings.debug:
+                raise
+    
     yield
     # Shutdown
     logger.info("Shutting down OSSGameForge Backend...")
@@ -48,19 +60,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Health check endpoint
-@app.get("/health")
-async def health_check():
-    """
-    Health check endpoint for monitoring
-    """
-    return {
-        "status": "healthy",
-        "service": "ossgameforge-backend",
-        "version": "0.1.0",
-        "mock_mode": os.getenv("MOCK_MODE", "false") == "true",
-        "use_local_model": os.getenv("USE_LOCAL_MODEL", "false") == "true"
-    }
+# Include health router for comprehensive health checks
+app.include_router(health.router, prefix="/health", tags=["Health"])
 
 # Root endpoint
 @app.get("/")
@@ -74,8 +75,8 @@ async def root():
         "health": "/health"
     }
 
-# Register routers (uncomment as they are implemented)
-# app.include_router(health.router, prefix="/api/health", tags=["Health"])
-# app.include_router(assets.router, prefix="/api/assets", tags=["Assets"])
-# app.include_router(generation.router, prefix="/api/generation", tags=["Generation"])
-# app.include_router(export.router, prefix="/api/export", tags=["Export"])
+# Register routers
+app.include_router(projects.router, prefix="/api/projects", tags=["Projects"])
+app.include_router(assets.router, prefix="/api", tags=["Assets"])
+app.include_router(generation.router, prefix="/api/generation", tags=["Generation"])
+app.include_router(export.router, prefix="/api", tags=["Export"])

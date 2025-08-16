@@ -1,0 +1,221 @@
+{
+  "assets": [
+    {
+      "id": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
+      "project_id": "proj_001",
+      "filename": "forest_background.png",
+      "path": "/assets/forest_background.png",
+      "type": "image",
+      "status": "processed",
+      "metadata": {
+        "width": 1920,
+        "height": 1080,
+        "format": "PNG",
+        "tags": ["forest", "background", "nature"]
+      },
+      "consent_hash": "abc123",
+      "exif_stripped": true,
+      "created_at": "2024-01-15T10:00:00Z"
+    },
+    {
+      "id": "b2c3d4e5-f6a7-8901-2345-678901bcdef0",
+      "project_id": "proj_001",
+      "filename": "jump_sound.wav",
+      "path": "/assets/jump_sound.wav",
+      "type": "audio",
+      "status": "processed",
+      "metadata": {
+        "duration": 0.5,
+        "format": "WAV",
+        "sample_rate": 44100
+      },
+      "consent_hash": "def456",
+      "exif_stripped": false,
+      "created_at": "2024-01-15T10:05:00Z"
+    },
+    {
+      "id": "c3d4e5f6-a7b8-9012-3456-789012cdef01",
+      "project_id": "proj_001", 
+      "filename": "player_sprite.png",
+      "path": "/assets/player_sprite.png",
+      "type": "image",
+      "status": "processed",
+      "metadata": {
+        "width": 64,
+        "height": 64,
+        "format": "PNG",
+        "tags": ["character", "player", "sprite"]
+      },
+      "consent_hash": "ghi789",
+      "exif_stripped": true,
+      "created_at": "2024-01-15T10:10:00Z"
+    }
+  ],
+  "scenes": [
+    {
+      "id": "scene_001",
+      "project_id": "proj_001",
+      "name": "Simple Platformer Level",
+      "description": "A basic platformer level with platforms and a player",
+      "version": "1.0.0",
+      "metadata": {
+        "width": 1920,
+        "height": 1080,
+        "background_color": "#87CEEB"
+      },
+      "entities": [
+        {
+          "id": "player_001",
+          "type": "player",
+          "name": "Player",
+          "position": {"x": 100, "y": 500},
+          "size": {"width": 64, "height": 64},
+          "sprite": "/assets/player_sprite.png",
+          "physics": {
+            "gravity": true,
+            "collision": true,
+            "mass": 1.0
+          }
+        },
+        {
+          "id": "platform_001",
+          "type": "platform",
+          "name": "Ground Platform",
+          "position": {"x": 0, "y": 600},
+          "size": {"width": 1920, "height": 100},
+          "color": "#654321",
+          "physics": {
+            "static": true,
+            "collision": true
+          }
+        },
+        {
+          "id": "platform_002",
+          "type": "platform",
+          "name": "Floating Platform 1",
+          "position": {"x": 300, "y": 450},
+          "size": {"width": 200, "height": 20},
+          "color": "#8B4513",
+          "physics": {
+            "static": true,
+            "collision": true
+          }
+        },
+        {
+          "id": "platform_003",
+          "type": "platform",
+          "name": "Floating Platform 2",
+          "position": {"x": 600, "y": 350},
+          "size": {"width": 200, "height": 20},
+          "color": "#8B4513",
+          "physics": {
+            "static": true,
+            "collision": true
+          }
+        },
+        {
+          "id": "goal_001",
+          "type": "goal",
+          "name": "Level Goal",
+          "position": {"x": 1700, "y": 540},
+          "size": {"width": 60, "height": 60},
+          "color": "#FFD700",
+          "properties": {
+            "next_level": "scene_002"
+          }
+        }
+      ],
+      "created_at": "2024-01-15T10:15:00Z"
+    }
+  ],
+  "generation_samples": [
+    {
+      "prompt": "Create a simple platformer game with a forest theme",
+      "scene": {
+        "id": "gen_001",
+        "name": "Forest Adventure",
+        "description": "Generated forest-themed platformer level",
+        "version": "1.0.0",
+        "metadata": {
+          "width": 1920,
+          "height": 1080,
+          "background_color": "#228B22",
+          "theme": "forest"
+        },
+        "entities": [
+          {
+            "id": "player",
+            "type": "player",
+            "name": "Forest Explorer",
+            "position": {"x": 150, "y": 400},
+            "size": {"width": 48, "height": 64},
+            "sprite": "/assets/player_sprite.png"
+          },
+          {
+            "id": "ground",
+            "type": "platform",
+            "name": "Forest Floor",
+            "position": {"x": 0, "y": 650},
+            "size": {"width": 1920, "height": 150},
+            "texture": "grass",
+            "color": "#2d5016"
+          },
+          {
+            "id": "tree_platform_1",
+            "type": "platform",
+            "name": "Tree Branch",
+            "position": {"x": 400, "y": 500},
+            "size": {"width": 180, "height": 25},
+            "texture": "wood",
+            "color": "#8B4513"
+          }
+        ]
+      }
+    },
+    {
+      "prompt": "Generate a space shooter game level",
+      "scene": {
+        "id": "gen_002",
+        "name": "Space Defender",
+        "description": "Generated space shooter level",
+        "version": "1.0.0",
+        "metadata": {
+          "width": 1920,
+          "height": 1080,
+          "background_color": "#000033",
+          "theme": "space"
+        },
+        "entities": [
+          {
+            "id": "spaceship",
+            "type": "player",
+            "name": "Player Ship",
+            "position": {"x": 960, "y": 900},
+            "size": {"width": 80, "height": 60},
+            "sprite": "/assets/spaceship.png"
+          },
+          {
+            "id": "enemy_1",
+            "type": "enemy",
+            "name": "Alien Fighter",
+            "position": {"x": 300, "y": 100},
+            "size": {"width": 60, "height": 50},
+            "behavior": "patrol"
+          }
+        ]
+      }
+    }
+  ],
+  "projects": [
+    {
+      "id": "proj_001",
+      "name": "My First Game",
+      "description": "A simple platformer game project",
+      "owner": "demo_user",
+      "created_at": "2024-01-15T09:00:00Z",
+      "updated_at": "2024-01-15T10:30:00Z",
+      "assets_count": 3,
+      "scenes_count": 1
+    }
+  ]
+}

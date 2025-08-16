@@ -28,6 +28,8 @@ Our focus is unwavering. This disciplined focus is our greatest asset.
 
 ---
 Every time finish a Week or a Task, add a ✅ after them, such as ### "**Task 1.1 (Corrected): Project Init, Version Control & CI** ✅".
+When you need some required module like fastapi, app and so on to solve errors, you can install them.
+
 ## **Week 1: Foundation & Contracts (Focus: De-risk & Unblock)**
 
 **Goal of the Week:** To establish a rock-solid, simplified foundation. By the end of this week, the CI/CD will be green, and the frontend team will be completely unblocked by a reliable mock API, allowing for maximum parallel development.
@@ -64,7 +66,7 @@ Every time finish a Week or a Task, add a ✅ after them, such as ### "**Task 1.
     *   Direct pushes to `main` are blocked.
     *   The CI workflow runs and passes on a new PR.
 
-### **Task 1.2: Simplified Service Orchestration & Mock API First**
+### **Task 1.2: Simplified Service Orchestration & Mock API First** ✅
 *   **[Priority]** [MUST]
 *   **[Suggested Roles]** Backend (1), Frontend (1)
 *   **TODO (Task List):**
@@ -81,7 +83,7 @@ Every time finish a Week or a Task, add a ✅ after them, such as ### "**Task 1.
     *   Running `docker-compose up` starts the minimal services.
     *   The frontend team can immediately start developing against the backend running in `MOCK_MODE`.
 
-### **Task 1.3: Modular Backend & Minimalist Database**
+### **Task 1.3: Modular Backend & Minimalist Database** ✅
 *   **[Priority]** [MUST]
 *   **[Suggested Roles]** Backend (1)
 *   **TODO (Task List):**
@@ -105,7 +107,7 @@ Every time finish a Week or a Task, add a ✅ after them, such as ### "**Task 1.
 
 **Goal of the Week:** Build the core intelligence pipeline with a heavy focus on resilience and establish a quality gateway that is both robust and explicitly scalable.
 
-### **Task 2.1: Simplified Preprocessing Pipeline**
+### **Task 2.1: Simplified Preprocessing Pipeline** ✅
 *   **[Priority]** [MUST]
 *   **[Suggested Roles]** Backend (1)
 *   **TODO (Task List):**
@@ -122,7 +124,7 @@ Every time finish a Week or a Task, add a ✅ after them, such as ### "**Task 1.
     *   Uploading an image results in an EXIF-free file in MinIO.
     *   Async processing is handled by `BackgroundTasks` without blocking the API.
 
-### **Task 2.2: The Resilient Generation Engine with Explicit Fallbacks**
+### **Task 2.2: The Resilient Generation Engine with Explicit Fallbacks** ✅
 *   **[Priority]** [MUST]
 *   **[Suggested Roles]** Backend (1), ML/Infra (1)
 *   **TODO (Task List):**

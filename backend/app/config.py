@@ -2,8 +2,8 @@
 Configuration management for OSSGameForge backend
 """
 from pydantic_settings import BaseSettings
+from pydantic import Field
 from typing import Optional
-import os
 
 class Settings(BaseSettings):
     """
@@ -16,8 +16,8 @@ class Settings(BaseSettings):
     
     # API
     api_prefix: str = "/api"
-    mock_mode: bool = False
-    use_local_model: bool = False
+    mock_mode: bool = Field(default=False, env="MOCK_MODE")
+    use_local_model: bool = Field(default=False, env="USE_LOCAL_MODEL")
     
     # Database
     database_url: str = "postgresql://user:password@postgres:5432/ossgameforge"

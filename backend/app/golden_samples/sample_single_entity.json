@@ -1,0 +1,41 @@
+{
+  "id": "scene_single_entity_001",
+  "scene_name": "Single Entity Test",
+  "description": "Tests minimal viable scene with a single entity",
+  "style": "minimalist",
+  "metadata": {
+    "width": 640,
+    "height": 480,
+    "background_color": "#FFFFFF",
+    "test_case": "single_entity_rendering"
+  },
+  "entities": [
+    {
+      "id": "sole_entity",
+      "type": "static_object",
+      "name": "The Only Object",
+      "position": {"x": 320, "y": 240},
+      "size": {"width": 64, "height": 64},
+      "properties": {
+        "color": "#FF00FF",
+        "shape": "square",
+        "rotation": 45,
+        "opacity": 0.8,
+        "interactive": false,
+        "physics_enabled": false,
+        "render_order": 0
+      }
+    }
+  ],
+  "camera": {
+    "type": "static",
+    "position": {"x": 320, "y": 240},
+    "zoom": 1.0
+  },
+  "test_validations": {
+    "entity_count": 1,
+    "has_position": true,
+    "has_size": true,
+    "has_properties": true
+  }
+}

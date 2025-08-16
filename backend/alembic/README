@@ -1,0 +1,48 @@
+Database Migrations with Alembic
+================================
+
+This directory contains database migration scripts managed by Alembic.
+
+Common Commands (run from inside the backend container):
+--------------------------------------------------------
+
+1. Generate a new migration:
+   ```
+   docker-compose exec backend alembic revision --autogenerate -m "Description of changes"
+   ```
+
+2. Apply migrations:
+   ```
+   docker-compose exec backend alembic upgrade head
+   ```
+
+3. Rollback one migration:
+   ```
+   docker-compose exec backend alembic downgrade -1
+   ```
+
+4. View migration history:
+   ```
+   docker-compose exec backend alembic history
+   ```
+
+5. View current revision:
+   ```
+   docker-compose exec backend alembic current
+   ```
+
+Initial Setup:
+-------------
+The migrations have been configured to automatically detect changes
+in the SQLAlchemy models located in app/models/core_models.py
+
+Environment Variables:
+--------------------
+DATABASE_URL: Connection string for the PostgreSQL database
+  Default: postgresql://ossgf:ossgf123@postgres:5432/ossgameforge
+
+Files:
+-----
+- env.py: Alembic environment configuration
+- script.py.mako: Template for new migrations
+- versions/: Directory containing migration scripts

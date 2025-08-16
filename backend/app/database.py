@@ -48,7 +48,7 @@ def init_db():
     """
     try:
         # Import all models to ensure they are registered
-        from . import models
+        from . import models  # This imports all models from models/__init__.py
         
         # Create all tables
         Base.metadata.create_all(bind=engine)
@@ -62,8 +62,9 @@ def check_db_connection():
     Check if database is accessible
     """
     try:
+        from sqlalchemy import text
         db = SessionLocal()
-        db.execute("SELECT 1")
+        db.execute(text("SELECT 1"))
         db.close()
         logger.info("Database connection successful")
         return True

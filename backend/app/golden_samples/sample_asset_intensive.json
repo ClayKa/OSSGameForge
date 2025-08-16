@@ -1,0 +1,284 @@
+{
+  "id": "scene_asset_intensive_001",
+  "scene_name": "Forest Background Test",
+  "description": "Tests asset pathing, loading, and resource management",
+  "style": "adventure",
+  "metadata": {
+    "width": 1920,
+    "height": 1080,
+    "background_color": "#1a1a2e",
+    "ambient_light": 0.3,
+    "asset_preload": true
+  },
+  "assets": [
+    {
+      "id": "asset_forest_bg",
+      "type": "image",
+      "path": "/assets/backgrounds/forest.png",
+      "preload": true,
+      "metadata": {
+        "width": 1920,
+        "height": 1080,
+        "format": "png"
+      }
+    },
+    {
+      "id": "asset_grass_tile",
+      "type": "image",
+      "path": "/assets/tiles/grass_tile.png",
+      "preload": true,
+      "metadata": {
+        "width": 64,
+        "height": 64,
+        "tileable": true
+      }
+    },
+    {
+      "id": "asset_coin_sprite",
+      "type": "spritesheet",
+      "path": "/assets/sprites/coin_animated.png",
+      "preload": true,
+      "metadata": {
+        "frame_width": 32,
+        "frame_height": 32,
+        "frame_count": 8,
+        "animation_speed": 10
+      }
+    },
+    {
+      "id": "asset_player_sprite",
+      "type": "spritesheet",
+      "path": "/assets/sprites/player.png",
+      "preload": true,
+      "metadata": {
+        "frame_width": 48,
+        "frame_height": 64,
+        "animations": {
+          "idle": {"frames": [0, 1, 2, 3], "speed": 5},
+          "walk": {"frames": [4, 5, 6, 7, 8, 9], "speed": 10},
+          "jump": {"frames": [10, 11], "speed": 8}
+        }
+      }
+    },
+    {
+      "id": "asset_tree_fg",
+      "type": "image",
+      "path": "/assets/foreground/tree_large.png",
+      "preload": false,
+      "metadata": {
+        "width": 256,
+        "height": 384,
+        "alpha": true
+      }
+    },
+    {
+      "id": "asset_bush",
+      "type": "image",
+      "path": "/assets/decorations/bush.png",
+      "preload": false,
+      "metadata": {
+        "width": 128,
+        "height": 96
+      }
+    },
+    {
+      "id": "asset_jump_sound",
+      "type": "audio",
+      "path": "/assets/audio/jump.wav",
+      "preload": true,
+      "metadata": {
+        "duration": 0.5,
+        "format": "wav",
+        "sample_rate": 44100
+      }
+    },
+    {
+      "id": "asset_coin_sound",
+      "type": "audio",
+      "path": "/assets/audio/coin_collect.wav",
+      "preload": true,
+      "metadata": {
+        "duration": 0.3,
+        "format": "wav"
+      }
+    },
+    {
+      "id": "asset_bg_music",
+      "type": "audio",
+      "path": "/assets/audio/forest_ambience.mp3",
+      "preload": false,
+      "metadata": {
+        "duration": 180,
+        "format": "mp3",
+        "loop": true,
+        "volume": 0.5
+      }
+    }
+  ],
+  "entities": [
+    {
+      "id": "bg_layer_1",
+      "type": "background_image",
+      "name": "Forest Background",
+      "asset_id": "asset_forest_bg",
+      "position": {"x": 0, "y": 0},
+      "size": {"width": 1920, "height": 1080},
+      "properties": {
+        "layer": -3,
+        "parallax_factor": 0.2,
+        "tint": "#ffffff",
+        "opacity": 1.0
+      }
+    },
+    {
+      "id": "bg_layer_2",
+      "type": "background_image",
+      "name": "Trees Mid Layer",
+      "asset_id": "asset_tree_fg",
+      "position": {"x": 200, "y": 300},
+      "size": {"width": 256, "height": 384},
+      "properties": {
+        "layer": -2,
+        "parallax_factor": 0.5,
+        "opacity": 0.8
+      }
+    },
+    {
+      "id": "ground_tiles",
+      "type": "tiled_platform",
+      "name": "Grass Ground",
+      "asset_id": "asset_grass_tile",
+      "position": {"x": 0, "y": 900},
+      "size": {"width": 1920, "height": 180},
+      "properties": {
+        "tile_width": 64,
+        "tile_height": 64,
+        "collision": true,
+        "layer": 0
+      }
+    },
+    {
+      "id": "platform_tiled_1",
+      "type": "tiled_platform",
+      "name": "Grass Platform",
+      "asset_id": "asset_grass_tile",
+      "position": {"x": 300, "y": 600},
+      "size": {"width": 256, "height": 64},
+      "properties": {
+        "tile_width": 64,
+        "tile_height": 64,
+        "collision": true
+      }
+    },
+    {
+      "id": "player_character",
+      "type": "player_sprite",
+      "name": "Player Character",
+      "asset_id": "asset_player_sprite",
+      "position": {"x": 100, "y": 850},
+      "size": {"width": 48, "height": 64},
+      "properties": {
+        "current_animation": "idle",
+        "health": 100,
+        "collision": true,
+        "sounds": {
+          "jump": "asset_jump_sound"
+        }
+      }
+    },
+    {
+      "id": "coin_animated_1",
+      "type": "collectible_sprite",
+      "name": "Gold Coin 1",
+      "asset_id": "asset_coin_sprite",
+      "position": {"x": 400, "y": 550},
+      "size": {"width": 32, "height": 32},
+      "properties": {
+        "value": 10,
+        "animation_playing": true,
+        "sound_on_collect": "asset_coin_sound",
+        "trigger": true
+      }
+    },
+    {
+      "id": "coin_animated_2",
+      "type": "collectible_sprite",
+      "name": "Gold Coin 2",
+      "asset_id": "asset_coin_sprite",
+      "position": {"x": 500, "y": 550},
+      "size": {"width": 32, "height": 32},
+      "properties": {
+        "value": 10,
+        "animation_playing": true,
+        "sound_on_collect": "asset_coin_sound",
+        "trigger": true
+      }
+    },
+    {
+      "id": "coin_animated_3",
+      "type": "collectible_sprite",
+      "name": "Gold Coin 3",
+      "asset_id": "asset_coin_sprite",
+      "position": {"x": 600, "y": 550},
+      "size": {"width": 32, "height": 32},
+      "properties": {
+        "value": 10,
+        "animation_playing": true,
+        "sound_on_collect": "asset_coin_sound",
+        "trigger": true
+      }
+    },
+    {
+      "id": "decoration_bush_1",
+      "type": "decoration",
+      "name": "Bush 1",
+      "asset_id": "asset_bush",
+      "position": {"x": 250, "y": 820},
+      "size": {"width": 128, "height": 96},
+      "properties": {
+        "layer": 1,
+        "collision": false,
+        "interactive": false
+      }
+    },
+    {
+      "id": "decoration_bush_2",
+      "type": "decoration",
+      "name": "Bush 2",
+      "asset_id": "asset_bush",
+      "position": {"x": 750, "y": 820},
+      "size": {"width": 128, "height": 96},
+      "properties": {
+        "layer": 1,
+        "collision": false,
+        "flipped_horizontal": true
+      }
+    },
+    {
+      "id": "fg_tree",
+      "type": "foreground_image",
+      "name": "Foreground Tree",
+      "asset_id": "asset_tree_fg",
+      "position": {"x": 1200, "y": 516},
+      "size": {"width": 256, "height": 384},
+      "properties": {
+        "layer": 10,
+        "opacity": 0.9,
+        "parallax_factor": -0.1
+      }
+    }
+  ],
+  "audio_configuration": {
+    "background_music": "asset_bg_music",
+    "master_volume": 0.8,
+    "sfx_volume": 1.0,
+    "music_volume": 0.5
+  },
+  "resource_management": {
+    "max_texture_memory": 512,
+    "texture_compression": true,
+    "asset_streaming": true,
+    "cache_policy": "lru",
+    "preload_radius": 500
+  }
+}
