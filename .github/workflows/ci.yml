@@ -159,10 +159,10 @@ jobs:
 
       - name: Test Docker Compose
         run: |
-          docker-compose config
-          docker-compose up -d postgres minio
+          docker compose config
+          docker compose up -d postgres minio
           sleep 10
-          docker-compose ps
+          docker compose ps
 
   # Frontend checks (placeholder for when frontend is ready)
   frontend-checks:
