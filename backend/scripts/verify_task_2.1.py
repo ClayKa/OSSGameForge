@@ -12,25 +12,26 @@ from pathlib import Path
 from PIL import Image
 
 # Add backend to path
-sys.path.insert(0, '/app')
+sys.path.insert(0, "/app")
+
 
 def verify_exif_stripping():
     """Verify EXIF stripping functionality"""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("Verifying EXIF Stripping")
-    print("="*60)
+    print("=" * 60)
 
     try:
         from app.services import asset_service
 
         # Create test image with EXIF
-        img = Image.new('RGB', (100, 100), color='red')
+        img = Image.new("RGB", (100, 100), color="red")
         exif_data = img.getexif()
         exif_data[0x010F] = "Test Camera Make"
         exif_data[0x0110] = "Test Camera Model"
 
         img_bytes = io.BytesIO()
-        img.save(img_bytes, format='JPEG', exif=exif_data)
+        img.save(img_bytes, format="JPEG", exif=exif_data)
         img_bytes.seek(0)
 
         # Verify original has EXIF
@@ -47,9 +48,8 @@ def verify_exif_stripping():
 
         # Process image (strips EXIF)
         import asyncio
-        processed_data = asyncio.run(
-            asset_service._process_image(img_bytes.getvalue(), mock_asset)
-        )
+
+        processed_data = asyncio.run(asset_service._process_image(img_bytes.getvalue(), mock_asset))
 
         # Verify EXIF is stripped
         processed_img = Image.open(io.BytesIO(processed_data))
@@ -70,9 +70,9 @@ def verify_exif_stripping():
 
 def verify_consent_validation():
     """Verify user consent validation"""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("Verifying User Consent Validation")
-    print("="*60)
+    print("=" * 60)
 
     try:
         from app.main import app
@@ -84,7 +84,7 @@ def verify_consent_validation():
         response = client.post(
             "/api/projects/test_project/assets",
             files={"file": ("test.jpg", io.BytesIO(b"test"), "image/jpeg")},
-            data={"user_consent": "false"}
+            data={"user_consent": "false"},
         )
 
         if response.status_code == 400:
@@ -98,7 +98,7 @@ def verify_consent_validation():
         response = client.post(
             "/api/projects/test_project/assets",
             files={"file": ("test.jpg", io.BytesIO(b"test"), "image/jpeg")},
-            data={"user_consent": "true"}
+            data={"user_consent": "true"},
         )
 
         if response.status_code == 202:
@@ -116,9 +116,9 @@ def verify_consent_validation():
 
 def verify_async_processing():
     """Verify async processing with BackgroundTasks"""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("Verifying Async Processing")
-    print("="*60)
+    print("=" * 60)
 
     try:
         from app.services import asset_service
@@ -128,10 +128,7 @@ def verify_async_processing():
         bg_tasks = BackgroundTasks()
 
         # Add a mock task
-        bg_tasks.add_task(
-            asset_service.extract_metadata_task,
-            asset_id="test_asset_123"
-        )
+        bg_tasks.add_task(asset_service.extract_metadata_task, asset_id="test_asset_123")
 
         print("✓ Background task added successfully")
         print(f"✓ Number of pending tasks: {len(bg_tasks.tasks)}")
@@ -150,16 +147,16 @@ def verify_async_processing():
 
 def verify_file_structure():
     """Verify all required files exist"""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("Verifying File Structure")
-    print("="*60)
+    print("=" * 60)
 
     required_files = [
         "backend/app/services/asset_service.py",
         "backend/app/storage.py",
         "backend/app/routers/assets.py",
         "tests/backend/test_preprocessing_pipeline.py",
-        "docs/task2.1_summary.md"
+        "docs/task2.1_summary.md",
     ]
 
     all_exist = True
@@ -181,9 +178,9 @@ def verify_file_structure():
 
 def verify_metadata_extraction():
     """Verify metadata extraction capabilities"""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("Verifying Metadata Extraction")
-    print("="*60)
+    print("=" * 60)
 
     try:
         from unittest.mock import MagicMock
@@ -208,6 +205,7 @@ def verify_metadata_extraction():
         mock_tag.album = None
 
         import tinytag
+
         original_get = tinytag.TinyTag.get
         tinytag.TinyTag.get = lambda _: mock_tag
 
@@ -234,23 +232,23 @@ def verify_metadata_extraction():
 
 def main():
     """Run all verification checks"""
-    print("="*70)
+    print("=" * 70)
     print("Task 2.1 Verification Script")
     print("Simplified Preprocessing Pipeline")
-    print("="*70)
+    print("=" * 70)
 
     results = {
         "File Structure": verify_file_structure(),
         "User Consent Validation": verify_consent_validation(),
         "EXIF Stripping": verify_exif_stripping(),
         "Async Processing": verify_async_processing(),
-        "Metadata Extraction": verify_metadata_extraction()
+        "Metadata Extraction": verify_metadata_extraction(),
     }
 
     # Summary
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("Verification Summary")
-    print("="*70)
+    print("=" * 70)
 
     all_passed = True
     for check_name, passed in results.items():
@@ -259,7 +257,7 @@ def main():
         if not passed:
             all_passed = False
 
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     if all_passed:
         print("🎉 SUCCESS: Task 2.1 has been completed successfully!")
         print("All requirements have been implemented and verified!")

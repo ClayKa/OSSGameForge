@@ -1,6 +1,7 @@
 """
 Setup configuration for OSSGameForge backend
 """
+
 from setuptools import find_packages, setup
 
 setup(

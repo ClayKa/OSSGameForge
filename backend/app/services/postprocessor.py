@@ -4,6 +4,7 @@ Postprocessor Service
 This service processes AI output into valid scene JSON.
 It handles validation, normalization, and enhancement of generated scenes.
 """
+
 import uuid
 from datetime import datetime, timezone
 from typing import Any
@@ -17,10 +18,7 @@ class Postprocessor:
         self.default_properties = self._initialize_default_properties()
 
     def process_scene(
-        self,
-        raw_scene: dict[str, Any],
-        project_id: str,
-        assets: list[dict[str, Any]] | None = None
+        self, raw_scene: dict[str, Any], project_id: str, assets: list[dict[str, Any]] | None = None
     ) -> dict[str, Any]:
         """
         Process raw AI output into a valid scene
@@ -37,9 +35,7 @@ class Postprocessor:
         processed_scene = self._ensure_required_fields(raw_scene, project_id)
 
         # Validate and normalize entities
-        processed_scene["entities"] = self._process_entities(
-            processed_scene.get("entities", [])
-        )
+        processed_scene["entities"] = self._process_entities(processed_scene.get("entities", []))
 
         # Incorporate assets if provided
         if assets:
@@ -77,9 +73,7 @@ class Postprocessor:
         return all(self._validate_entity(entity) for entity in scene["entities"])
 
     def enhance_scene(
-        self,
-        scene: dict[str, Any],
-        enhancements: dict[str, Any] | None = None
+        self, scene: dict[str, Any], enhancements: dict[str, Any] | None = None
     ) -> dict[str, Any]:
         """
         Apply enhancements to an existing scene
@@ -107,11 +101,7 @@ class Postprocessor:
 
         return enhanced
 
-    def _ensure_required_fields(
-        self,
-        scene: dict[str, Any],
-        project_id: str
-    ) -> dict[str, Any]:
+    def _ensure_required_fields(self, scene: dict[str, Any], project_id: str) -> dict[str, Any]:
         """Ensure scene has all required fields"""
         if "id" not in scene:
             scene["id"] = f"scene_{uuid.uuid4().hex[:8]}"
@@ -158,8 +148,7 @@ class Postprocessor:
             if "properties" not in entity:
                 entity["properties"] = {}
             entity["properties"] = self._apply_default_properties(
-                entity["type"],
-                entity["properties"]
+                entity["type"], entity["properties"]
             )
 
             processed.append(entity)
@@ -199,10 +188,7 @@ class Postprocessor:
     def _normalize_size(self, size: Any) -> dict[str, float]:
         """Normalize size to standard format"""
         if isinstance(size, dict):
-            return {
-                "width": float(size.get("width", 32)),
-                "height": float(size.get("height", 32))
-            }
+            return {"width": float(size.get("width", 32)), "height": float(size.get("height", 32))}
         return {"width": 32.0, "height": 32.0}
 
     def _get_default_size(self, entity_type: str) -> dict[str, float]:
@@ -212,14 +198,12 @@ class Postprocessor:
             "enemy": {"width": 32, "height": 32},
             "platform": {"width": 100, "height": 20},
             "item": {"width": 16, "height": 16},
-            "background": {"width": 800, "height": 600}
+            "background": {"width": 800, "height": 600},
         }
         return defaults.get(entity_type, {"width": 32, "height": 32})
 
     def _apply_default_properties(
-        self,
-        entity_type: str,
-        properties: dict[str, Any]
+        self, entity_type: str, properties: dict[str, Any]
     ) -> dict[str, Any]:
         """Apply default properties based on entity type"""
         if entity_type not in self.default_properties:
@@ -230,9 +214,7 @@ class Postprocessor:
         return defaults
 
     def _incorporate_assets(
-        self,
-        scene: dict[str, Any],
-        assets: list[dict[str, Any]]
+        self, scene: dict[str, Any], assets: list[dict[str, Any]]
     ) -> dict[str, Any]:
         """Incorporate available assets into the scene"""
         # Add asset references to scene
@@ -242,7 +224,7 @@ class Postprocessor:
             asset_ref = {
                 "id": asset.get("id"),
                 "type": asset.get("type"),
-                "path": asset.get("path")
+                "path": asset.get("path"),
             }
             scene["assets"].append(asset_ref)
 
@@ -261,7 +243,7 @@ class Postprocessor:
             "asset_count": len(scene.get("assets", [])),
             "style": scene.get("style", "unknown"),
             "version": "1.0.0",
-            "processed_at": datetime.now(timezone.utc).isoformat()
+            "processed_at": datetime.now(timezone.utc).isoformat(),
         }
 
     def _create_minimal_scene(self, project_id: str) -> dict[str, Any]:
@@ -277,15 +259,15 @@ class Postprocessor:
                     "type": "player",
                     "position": {"x": 100, "y": 100},
                     "size": {"width": 32, "height": 48},
-                    "properties": {"health": 100}
+                    "properties": {"health": 100},
                 }
             ],
             "metadata": {
                 "entity_count": 1,
                 "asset_count": 0,
                 "style": "platformer",
-                "version": "1.0.0"
-            }
+                "version": "1.0.0",
+            },
         }
 
     def _add_physics_properties(self, scene: dict[str, Any]) -> dict[str, Any]:
@@ -300,9 +282,13 @@ class Postprocessor:
                 entity["properties"]["physics"] = {
                     "gravity": entity["type"] != "platform",
                     "collision": True,
-                    "mass": 1.0 if entity["type"] == "player" else 0.0 if entity["type"] == "platform" else 0.5,
+                    "mass": (
+                        1.0
+                        if entity["type"] == "player"
+                        else 0.0 if entity["type"] == "platform" else 0.5
+                    ),
                     "friction": 0.8,
-                    "restitution": 0.2
+                    "restitution": 0.2,
                 }
         return scene
 
@@ -312,7 +298,7 @@ class Postprocessor:
             if "collision_box" not in entity:
                 entity["collision_box"] = {
                     "offset": {"x": 0, "y": 0},
-                    "size": entity["size"].copy()
+                    "size": entity["size"].copy(),
                 }
         return scene
 
@@ -321,7 +307,7 @@ class Postprocessor:
         # Simple optimization - ensure minimum spacing
         entities = scene.get("entities", [])
         for i, entity in enumerate(entities):
-            for _j, other in enumerate(entities[i+1:], i+1):
+            for _j, other in enumerate(entities[i + 1 :], i + 1):
                 if self._entities_overlap(entity, other):
                     # Move the second entity
                     other["position"]["x"] += entity["size"]["width"] + 10
@@ -331,17 +317,17 @@ class Postprocessor:
         """Check if two entities overlap"""
         # Simple AABB collision check
         return (
-            e1["position"]["x"] < e2["position"]["x"] + e2["size"]["width"] and
-            e1["position"]["x"] + e1["size"]["width"] > e2["position"]["x"] and
-            e1["position"]["y"] < e2["position"]["y"] + e2["size"]["height"] and
-            e1["position"]["y"] + e1["size"]["height"] > e2["position"]["y"]
+            e1["position"]["x"] < e2["position"]["x"] + e2["size"]["width"]
+            and e1["position"]["x"] + e1["size"]["width"] > e2["position"]["x"]
+            and e1["position"]["y"] < e2["position"]["y"] + e2["size"]["height"]
+            and e1["position"]["y"] + e1["size"]["height"] > e2["position"]["y"]
         )
 
     def _add_lighting_system(self, scene: dict[str, Any]) -> dict[str, Any]:
         """Add lighting system to scene"""
         scene["lighting"] = {
             "ambient": {"color": "#ffffff", "intensity": 0.5},
-            "directional": {"color": "#ffff00", "intensity": 0.8, "angle": 45}
+            "directional": {"color": "#ffff00", "intensity": 0.8, "angle": 45},
         }
         return scene
 
@@ -349,7 +335,7 @@ class Postprocessor:
         """Add audio cues to scene"""
         scene["audio"] = {
             "background_music": "assets/audio/theme.mp3",
-            "ambient_sounds": ["assets/audio/wind.mp3"]
+            "ambient_sounds": ["assets/audio/wind.mp3"],
         }
         return scene
 
@@ -359,7 +345,7 @@ class Postprocessor:
             "max_entities": 100,
             "max_scene_size": {"width": 10000, "height": 10000},
             "valid_entity_types": ["player", "enemy", "platform", "item", "background", "object"],
-            "valid_styles": ["platformer", "rpg", "puzzle", "adventure"]
+            "valid_styles": ["platformer", "rpg", "puzzle", "adventure"],
         }
 
     def _initialize_default_properties(self) -> dict[str, dict[str, Any]]:
@@ -369,7 +355,7 @@ class Postprocessor:
             "enemy": {"health": 50, "damage": 10, "speed": 3},
             "platform": {"solid": True, "friction": 0.8},
             "item": {"collectable": True, "value": 1},
-            "background": {"parallax": False, "depth": 0}
+            "background": {"parallax": False, "depth": 0},
         }
 
 

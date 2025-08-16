@@ -1,6 +1,7 @@
 """
 Integration tests for API endpoints
 """
+
 from unittest.mock import patch
 
 import pytest
@@ -69,10 +70,7 @@ class TestAPIIntegration:
         """Test CORS headers are properly set"""
         response = test_client.options(
             "/health",
-            headers={
-                "Origin": "http://localhost:3000",
-                "Access-Control-Request-Method": "GET"
-            }
+            headers={"Origin": "http://localhost:3000", "Access-Control-Request-Method": "GET"},
         )
 
         # CORS preflight should return 200
@@ -102,12 +100,15 @@ class TestAPIIntegration:
         assert "detail" in data
         assert data["detail"] == "Method Not Allowed"
 
-    @pytest.mark.parametrize("endpoint,method", [
-        ("/health", "get"),
-        ("/", "get"),
-        ("/docs", "get"),
-        ("/openapi.json", "get"),
-    ])
+    @pytest.mark.parametrize(
+        "endpoint,method",
+        [
+            ("/health", "get"),
+            ("/", "get"),
+            ("/docs", "get"),
+            ("/openapi.json", "get"),
+        ],
+    )
     def test_endpoints_accessibility(self, test_client, endpoint, method):
         """Test that all documented endpoints are accessible"""
         response = getattr(test_client, method)(endpoint)

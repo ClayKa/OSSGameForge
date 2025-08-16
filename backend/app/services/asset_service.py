@@ -7,6 +7,7 @@ Handles asset processing including:
 - Metadata extraction from various file types
 - Async processing with database management
 """
+
 import hashlib
 import io
 import logging
@@ -26,11 +27,7 @@ logger = logging.getLogger(__name__)
 
 
 def create_initial_asset_record(
-    db: Session,
-    project_id: str,
-    filename: str,
-    content_type: str,
-    file_size: int = 0
+    db: Session, project_id: str, filename: str, content_type: str, file_size: int = 0
 ) -> Asset:
     """
     Create initial asset record in database
@@ -47,9 +44,7 @@ def create_initial_asset_record(
     """
     # Create consent hash for tracking
     user_id = "user_placeholder_123"  # TODO: Get from auth context
-    consent_hash = hashlib.sha256(
-        f"{user_id}{filename}{time.time()}".encode()
-    ).hexdigest()
+    consent_hash = hashlib.sha256(f"{user_id}{filename}{time.time()}".encode()).hexdigest()
 
     # Determine asset type from content type
     asset_type = _determine_asset_type(content_type)
@@ -65,8 +60,8 @@ def create_initial_asset_record(
         asset_metadata={
             "original_filename": filename,
             "content_type": content_type,
-            "file_size": file_size
-        }
+            "file_size": file_size,
+        },
     )
 
     db.add(new_asset)
@@ -92,10 +87,7 @@ def _determine_asset_type(content_type: str) -> str:
 
 
 async def process_and_store_file(
-    db: Session,
-    asset: Asset,
-    file_data: bytes,
-    original_filename: str
+    db: Session, asset: Asset, file_data: bytes, original_filename: str
 ) -> str:
     """
     Process and store uploaded file
@@ -130,7 +122,7 @@ async def process_and_store_file(
             object_name=storage_path,
             data=io.BytesIO(processed_data),
             length=len(processed_data),
-            content_type=asset.asset_metadata.get("content_type", "application/octet-stream")
+            content_type=asset.asset_metadata.get("content_type", "application/octet-stream"),
         )
 
         # Update asset record
@@ -165,12 +157,14 @@ async def _process_image(file_data: bytes, asset: Asset) -> bytes:
         image = Image.open(io.BytesIO(file_data))
 
         # Store basic metadata before stripping
-        asset.asset_metadata.update({
-            "width": image.width,
-            "height": image.height,
-            "format": image.format,
-            "mode": image.mode
-        })
+        asset.asset_metadata.update(
+            {
+                "width": image.width,
+                "height": image.height,
+                "format": image.format,
+                "mode": image.mode,
+            }
+        )
 
         # Strip EXIF data by creating new image
         # This removes all metadata including EXIF, IPTC, and XMP
@@ -239,8 +233,7 @@ def extract_metadata_task(asset_id: str):
             try:
                 # Download to temp file
                 file_data = download_file_from_storage(
-                    bucket_name=bucket_name,
-                    object_name=asset.path
+                    bucket_name=bucket_name, object_name=asset.path
                 )
                 temp_file.write(file_data)
                 temp_file.flush()

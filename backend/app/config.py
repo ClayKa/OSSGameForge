@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     """
     Application settings with environment variable support
     """
+
     # Application
     app_name: str = "OSSGameForge"
     app_version: str = "0.1.0"
@@ -44,16 +45,23 @@ class Settings(BaseSettings):
     allowed_video_types: list = ["video/mp4", "video/webm", "video/ogg"]
     # Processing
     background_task_timeout: int = 300  # 5 minutes
+
     class Config:
         env_file = ".env"
         case_sensitive = False
+
         # Allow reading from environment variables
         @classmethod
         def parse_env_var(cls, field_name: str, raw_val: str):
-            if field_name in ('cors_origins', 'allowed_image_types',
-                             'allowed_audio_types', 'allowed_video_types'):
-                return [x.strip() for x in raw_val.split(',')]
+            if field_name in (
+                "cors_origins",
+                "allowed_image_types",
+                "allowed_audio_types",
+                "allowed_video_types",
+            ):
+                return [x.strip() for x in raw_val.split(",")]
             return raw_val
+
 
 # Create global settings instance
 settings = Settings()

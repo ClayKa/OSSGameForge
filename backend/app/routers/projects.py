@@ -1,6 +1,7 @@
 """
 Projects router for OSSGameForge API
 """
+
 import json
 from datetime import datetime
 from pathlib import Path
@@ -12,6 +13,7 @@ from ..config import settings
 from ..schemas.project import ProjectCreate, ProjectResponse
 
 router = APIRouter()
+
 
 def load_mock_data():
     """Load mock data from JSON file"""
@@ -25,6 +27,7 @@ def load_mock_data():
             return json.load(f)
     return {"projects": [], "assets": [], "scenes": []}
 
+
 @router.get("/", response_model=list[ProjectResponse])
 async def list_projects():
     """List all projects"""
@@ -34,6 +37,7 @@ async def list_projects():
 
     # TODO: Implement real database query
     return []
+
 
 @router.post("/", response_model=ProjectResponse, status_code=status.HTTP_201_CREATED)
 async def create_project(project: ProjectCreate):
@@ -48,12 +52,13 @@ async def create_project(project: ProjectCreate):
             "created_at": datetime.utcnow().isoformat() + "Z",
             "updated_at": datetime.utcnow().isoformat() + "Z",
             "assets_count": 0,
-            "scenes_count": 0
+            "scenes_count": 0,
         }
         return new_project
 
     # TODO: Implement real project creation
     raise HTTPException(status_code=501, detail="Real mode not implemented yet")
+
 
 @router.get("/{project_id}", response_model=ProjectResponse)
 async def get_project(project_id: str):

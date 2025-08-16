@@ -8,6 +8,7 @@ This module orchestrates the entire generation pipeline:
 3. Post-processing and validation
 4. Audit logging for all requests
 """
+
 import hashlib
 import logging
 import time
@@ -38,7 +39,7 @@ async def log_generation(
     latency_ms: int,
     request_payload: dict[str, Any],
     response_payload: dict[str, Any] | None = None,
-    error: str | None = None
+    error: str | None = None,
 ) -> None:
     """
     Log generation request to database for audit and performance tracking
@@ -65,7 +66,7 @@ async def log_generation(
             latency_ms=latency_ms,
             request_payload=request_payload,
             response_payload=response_payload,
-            error=error
+            error=error,
         )
         db.add(log_entry)
         db.commit()
@@ -76,10 +77,7 @@ async def log_generation(
 
 
 async def save_scene_to_db(
-    db: Session,
-    project_id: str,
-    scene_data: dict[str, Any],
-    generation_log_id: str | None = None
+    db: Session, project_id: str, scene_data: dict[str, Any], generation_log_id: str | None = None
 ) -> None:
     """
     Save generated scene to database
@@ -96,7 +94,7 @@ async def save_scene_to_db(
             name=scene_data.get("scene_name", "Untitled Scene"),
             style=scene_data.get("style", "platformer"),
             scene_data=scene_data,
-            generation_log_id=generation_log_id
+            generation_log_id=generation_log_id,
         )
         db.add(scene)
         db.commit()
@@ -108,9 +106,7 @@ async def save_scene_to_db(
 
 @router.post("/", response_model=GenerationResponse)
 async def generate_scene(
-    request: GenerationRequest,
-    background_tasks: BackgroundTasks,
-    db: Session = Depends(get_db)
+    request: GenerationRequest, background_tasks: BackgroundTasks, db: Session = Depends(get_db)
 ):
     """
     Generate a game scene from prompt with comprehensive logging
@@ -140,10 +136,11 @@ async def generate_scene(
         # Fetch assets from database if provided
         assets_data = []
         if request.assets:
-            assets = db.query(Asset).filter(
-                Asset.id.in_(request.assets),
-                Asset.project_id == request.project_id
-            ).all()
+            assets = (
+                db.query(Asset)
+                .filter(Asset.id.in_(request.assets), Asset.project_id == request.project_id)
+                .all()
+            )
             assets_data = [asset.to_dict() for asset in assets]
 
         context = context_builder.build_generation_prompt(
@@ -151,22 +148,19 @@ async def generate_scene(
             project_id=request.project_id,
             style=request.style,
             assets=assets_data,
-            constraints=request.constraints
+            constraints=request.constraints,
         )
 
         # Step 2: Call InferenceClient for generation
         logger.info(f"Generating scene with prompt hash: {context['prompt_hash']}")
         generation_result = await inference_client.generate_scene(
-            context=context,
-            model_version=request.model_version
+            context=context, model_version=request.model_version
         )
 
         # Step 3: Post-process the generated scene
         logger.info("Post-processing generated scene")
         processed_scene = postprocessor.process_scene(
-            raw_scene=generation_result["scene"],
-            project_id=request.project_id,
-            assets=assets_data
+            raw_scene=generation_result["scene"], project_id=request.project_id, assets=assets_data
         )
 
         # Validate the processed scene
@@ -191,7 +185,7 @@ async def generate_scene(
             status=generation_result["metadata"]["status"],
             latency_ms=latency_ms,
             request_payload=request.dict(),
-            response_payload=enhanced_scene
+            response_payload=enhanced_scene,
         )
 
         # Save scene to database (in background)
@@ -200,7 +194,7 @@ async def generate_scene(
             db=db,
             project_id=request.project_id,
             scene_data=enhanced_scene,
-            generation_log_id=generation_log_id
+            generation_log_id=generation_log_id,
         )
 
         # Step 5: Return response
@@ -214,8 +208,8 @@ async def generate_scene(
                 "model_version": generation_result["metadata"]["model_version"],
                 "use_local_model": generation_result["metadata"].get("use_local_model", False),
                 "fallback_sample": generation_result["metadata"].get("fallback_sample"),
-                "prompt_hash": context["prompt_hash"]
-            }
+                "prompt_hash": context["prompt_hash"],
+            },
         )
 
     except Exception as e:
@@ -233,12 +227,11 @@ async def generate_scene(
             status="error",
             latency_ms=latency_ms,
             request_payload=request.dict(),
-            error=str(e)
+            error=str(e),
         )
 
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Generation failed: {str(e)}"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Generation failed: {str(e)}"
         ) from e
 
 
@@ -264,7 +257,7 @@ async def list_golden_samples():
     """
     return {
         "samples": inference_client.list_golden_samples(),
-        "total": len(inference_client.golden_samples)
+        "total": len(inference_client.golden_samples),
     }
 
 
@@ -279,7 +272,6 @@ async def get_golden_sample(sample_name: str):
     sample = inference_client.load_golden_sample(sample_name)
     if not sample:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Golden sample '{sample_name}' not found"
+            status_code=status.HTTP_404_NOT_FOUND, detail=f"Golden sample '{sample_name}' not found"
         )
     return sample

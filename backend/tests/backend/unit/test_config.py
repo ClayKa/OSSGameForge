@@ -1,12 +1,13 @@
 """
 Unit tests for configuration module
 """
+
 import os
 import sys
 from unittest.mock import patch
 
 # Add backend to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', '..', 'backend'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "..", "backend"))
 
 from backend.app.config import Settings
 

@@ -4,6 +4,7 @@ Alembic environment configuration
 This file is executed whenever alembic commands are run.
 It configures the database connection and migration behavior.
 """
+
 import os
 import sys
 from logging.config import fileConfig
@@ -37,6 +38,7 @@ target_metadata = Base.metadata
 # can be acquired:
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
+
 
 def get_database_url():
     """Get database URL from environment or config"""
@@ -87,10 +89,7 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
-        context.configure(
-            connection=connection,
-            target_metadata=target_metadata
-        )
+        context.configure(connection=connection, target_metadata=target_metadata)
 
         with context.begin_transaction():
             context.run_migrations()

@@ -5,13 +5,14 @@ Run all backend tests without pytest dependencies issues
 import os
 import sys
 
-sys.path.insert(0, '/app')
+sys.path.insert(0, "/app")
+
 
 def run_test_imports():
     """Test imports and basic functionality"""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("RUNNING: Import and Basic Tests")
-    print("="*60)
+    print("=" * 60)
 
     from test_simple_imports import (
         test_api_endpoints_exist,
@@ -69,9 +70,9 @@ def run_test_imports():
 
 def run_schema_tests():
     """Test schema validation"""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("RUNNING: Schema Validation Tests")
-    print("="*60)
+    print("=" * 60)
 
     tests_passed = 0
     tests_failed = 0
@@ -94,7 +95,7 @@ def run_schema_tests():
             created_at="2024-01-01T00:00:00Z",
             updated_at="2024-01-01T00:00:00Z",
             assets_count=0,
-            scenes_count=0
+            scenes_count=0,
         )
         assert response.id == "proj_001"
         print("✅ ProjectResponse schema test PASSED")
@@ -111,9 +112,7 @@ def run_schema_tests():
         assert AssetStatus.PROCESSING == "processing"
 
         upload_response = AssetUploadResponse(
-            asset_id="asset_001",
-            status="processing",
-            message="Test"
+            asset_id="asset_001", status="processing", message="Test"
         )
         assert upload_response.asset_id == "asset_001"
         print("✅ Asset schema tests PASSED")
@@ -135,10 +134,7 @@ def run_schema_tests():
         size = Size(width=50, height=100)
         assert size.width == 50
 
-        request = GenerationRequest(
-            prompt="Create a level",
-            project_id="proj_001"
-        )
+        request = GenerationRequest(prompt="Create a level", project_id="proj_001")
         assert request.prompt == "Create a level"
         print("✅ Generation schema tests PASSED")
         tests_passed += 1
@@ -166,9 +162,9 @@ def run_schema_tests():
 
 def run_api_tests():
     """Test API endpoints"""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("RUNNING: API Endpoint Tests")
-    print("="*60)
+    print("=" * 60)
 
     from app.main import app
     from fastapi.testclient import TestClient
@@ -229,11 +225,11 @@ def run_api_tests():
 
 def run_mock_api_tests():
     """Test mock API functionality"""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("RUNNING: Mock API Tests")
-    print("="*60)
+    print("=" * 60)
 
-    os.environ['MOCK_MODE'] = 'true'
+    os.environ["MOCK_MODE"] = "true"
 
     from app.config import settings
     from app.main import app
@@ -248,10 +244,9 @@ def run_mock_api_tests():
 
     # Test project creation in mock mode
     try:
-        response = client.post("/api/projects/", json={
-            "name": "Test Project",
-            "description": "Test Description"
-        })
+        response = client.post(
+            "/api/projects/", json={"name": "Test Project", "description": "Test Description"}
+        )
         assert response.status_code == 201
         data = response.json()
         assert data["name"] == "Test Project"
@@ -263,10 +258,9 @@ def run_mock_api_tests():
 
     # Test generation in mock mode
     try:
-        response = client.post("/api/generate", json={
-            "prompt": "Create a test level",
-            "project_id": "proj_001"
-        })
+        response = client.post(
+            "/api/generate", json={"prompt": "Create a test level", "project_id": "proj_001"}
+        )
         assert response.status_code == 200
         data = response.json()
         assert "scene_id" in data
@@ -279,13 +273,9 @@ def run_mock_api_tests():
 
     # Test asset upload with consent
     try:
-        files = {'file': ('test.txt', b'test content', 'text/plain')}
-        data = {'user_consent': 'true'}
-        response = client.post(
-            "/api/projects/proj_001/assets",
-            files=files,
-            data=data
-        )
+        files = {"file": ("test.txt", b"test content", "text/plain")}
+        data = {"user_consent": "true"}
+        response = client.post("/api/projects/proj_001/assets", files=files, data=data)
         assert response.status_code == 202
         result = response.json()
         assert "asset_id" in result
@@ -297,13 +287,9 @@ def run_mock_api_tests():
 
     # Test asset upload without consent (should fail)
     try:
-        files = {'file': ('test.txt', b'test content', 'text/plain')}
-        data = {'user_consent': 'false'}
-        response = client.post(
-            "/api/projects/proj_001/assets",
-            files=files,
-            data=data
-        )
+        files = {"file": ("test.txt", b"test content", "text/plain")}
+        data = {"user_consent": "false"}
+        response = client.post("/api/projects/proj_001/assets", files=files, data=data)
         assert response.status_code == 400
         print("✅ Consent validation test PASSED")
         tests_passed += 1
@@ -313,10 +299,9 @@ def run_mock_api_tests():
 
     # Test export
     try:
-        response = client.post("/api/export?engine=html5", json={
-            "scene_id": "scene_001",
-            "include_assets": True
-        })
+        response = client.post(
+            "/api/export?engine=html5", json={"scene_id": "scene_001", "include_assets": True}
+        )
         assert response.status_code == 200
         print("✅ Mock export test PASSED")
         tests_passed += 1
@@ -329,9 +314,9 @@ def run_mock_api_tests():
 
 def main():
     """Run all tests and generate summary"""
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("OSSGameForge - Complete Test Suite")
-    print("="*70)
+    print("=" * 70)
 
     total_passed = 0
     total_failed = 0
@@ -357,9 +342,9 @@ def main():
     total_failed += failed
 
     # Print summary
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("TEST SUMMARY")
-    print("="*70)
+    print("=" * 70)
     print(f"Total Tests Run: {total_passed + total_failed}")
     print(f"✅ Passed: {total_passed}")
     print(f"❌ Failed: {total_failed}")

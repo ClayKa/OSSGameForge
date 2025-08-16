@@ -1,6 +1,7 @@
 """
 Export router for OSSGameForge API
 """
+
 import io
 import json
 import zipfile
@@ -15,6 +16,7 @@ from ..schemas.export import ExportEngine, ExportRequest
 
 router = APIRouter()
 
+
 def load_mock_data():
     """Load mock data from JSON file"""
     mock_file = Path("/app/mocks/mock_data.json")
@@ -26,6 +28,7 @@ def load_mock_data():
         with open(mock_file) as f:
             return json.load(f)
     return {"projects": [], "assets": [], "scenes": []}
+
 
 def create_html5_export(scene_data: dict) -> bytes:
     """Create a simple HTML5 export package"""
@@ -120,12 +123,12 @@ def create_html5_export(scene_data: dict) -> bytes:
         width=scene_data.get("metadata", {}).get("width", 1920),
         height=scene_data.get("metadata", {}).get("height", 1080),
         bg_color=scene_data.get("metadata", {}).get("background_color", "#87CEEB"),
-        scene_json=json.dumps(scene_data)
+        scene_json=json.dumps(scene_data),
     )
 
     # Create a zip file in memory
     zip_buffer = io.BytesIO()
-    with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+    with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
         # Add HTML file
         zip_file.writestr("index.html", html_content)
 
@@ -154,10 +157,10 @@ Generated with OSSGameForge
 
     return zip_buffer.getvalue()
 
+
 @router.post("/export")
 async def export_scene(
-    request: ExportRequest,
-    engine: ExportEngine = Query(default=ExportEngine.HTML5)
+    request: ExportRequest, engine: ExportEngine = Query(default=ExportEngine.HTML5)
 ):
     """Export scene to playable format"""
 
@@ -180,11 +183,7 @@ async def export_scene(
                 "name": "Exported Scene",
                 "description": "Mock exported scene",
                 "version": "1.0.0",
-                "metadata": {
-                    "width": 1920,
-                    "height": 1080,
-                    "background_color": "#87CEEB"
-                },
+                "metadata": {"width": 1920, "height": 1080, "background_color": "#87CEEB"},
                 "entities": [
                     {
                         "id": "player",
@@ -192,10 +191,10 @@ async def export_scene(
                         "name": "Player",
                         "position": {"x": 100, "y": 500},
                         "size": {"width": 50, "height": 50},
-                        "color": "#FF0000"
+                        "color": "#FF0000",
                     }
                 ],
-                "created_at": datetime.utcnow().isoformat() + "Z"
+                "created_at": datetime.utcnow().isoformat() + "Z",
             }
 
         if engine == ExportEngine.HTML5:
@@ -207,7 +206,7 @@ async def export_scene(
                 media_type="application/zip",
                 headers={
                     "Content-Disposition": f"attachment; filename=game_export_{scene['id']}.zip"
-                }
+                },
             )
         elif engine == ExportEngine.GODOT:
             # Mock Godot export (just return a .tscn file content as text)
@@ -221,14 +220,12 @@ position = Vector2({scene['entities'][0]['position']['x']}, {scene['entities'][0
             return StreamingResponse(
                 io.BytesIO(tscn_content.encode()),
                 media_type="text/plain",
-                headers={
-                    "Content-Disposition": f"attachment; filename=scene_{scene['id']}.tscn"
-                }
+                headers={"Content-Disposition": f"attachment; filename=scene_{scene['id']}.tscn"},
             )
         else:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Export engine {engine} not yet supported"
+                detail=f"Export engine {engine} not yet supported",
             )
 
     # TODO: Implement real export functionality

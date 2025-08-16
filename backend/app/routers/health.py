@@ -3,6 +3,7 @@ Health check router for monitoring service status
 
 Provides endpoints to verify application and dependency health.
 """
+
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -27,48 +28,33 @@ async def check_health(db: Session = Depends(get_db)):
         "status": "healthy",
         "version": settings.app_version,
         "environment": "development" if settings.debug else "production",
-        "services": {}
+        "services": {},
     }
 
     # Check database connectivity
     try:
         # Execute a simple query to verify database connection
         db.execute(text("SELECT 1"))
-        health_status["services"]["database"] = {
-            "status": "ok",
-            "type": "postgresql"
-        }
+        health_status["services"]["database"] = {"status": "ok", "type": "postgresql"}
     except Exception as e:
         health_status["status"] = "degraded"
-        health_status["services"]["database"] = {
-            "status": "error",
-            "error": str(e)
-        }
+        health_status["services"]["database"] = {"status": "error", "error": str(e)}
 
     # Check MinIO connectivity (if not in mock mode)
     if not settings.mock_mode:
         try:
             # In production, we would check MinIO connection here
-            health_status["services"]["storage"] = {
-                "status": "ok",
-                "type": "minio"
-            }
+            health_status["services"]["storage"] = {"status": "ok", "type": "minio"}
         except Exception as e:
             health_status["status"] = "degraded"
-            health_status["services"]["storage"] = {
-                "status": "error",
-                "error": str(e)
-            }
+            health_status["services"]["storage"] = {"status": "error", "error": str(e)}
     else:
-        health_status["services"]["storage"] = {
-            "status": "mocked",
-            "type": "minio"
-        }
+        health_status["services"]["storage"] = {"status": "mocked", "type": "minio"}
 
     # Check model service status
     health_status["services"]["inference"] = {
         "status": "ok" if settings.use_local_model else "fallback",
-        "mode": "local_model" if settings.use_local_model else "golden_samples"
+        "mode": "local_model" if settings.use_local_model else "golden_samples",
     }
 
     return health_status

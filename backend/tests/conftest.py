@@ -1,6 +1,7 @@
 """
 Pytest configuration and shared fixtures
 """
+
 import asyncio
 import os
 import sys
@@ -11,7 +12,7 @@ from unittest.mock import MagicMock
 import pytest
 
 # Add backend directory to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'backend'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "backend"))
 
 from app.config import Settings
 from app.database import Base, get_db
@@ -29,12 +30,14 @@ settings = Settings()
 # Test database URL (in-memory SQLite for speed)
 TEST_DATABASE_URL = "sqlite:///:memory:"
 
+
 @pytest.fixture(scope="session")
 def event_loop():
     """Create an instance of the default event loop for the test session."""
     loop = asyncio.get_event_loop_policy().new_event_loop()
     yield loop
     loop.close()
+
 
 @pytest.fixture(scope="function")
 def test_db_engine():
@@ -49,21 +52,20 @@ def test_db_engine():
     Base.metadata.drop_all(bind=engine)
     engine.dispose()
 
+
 @pytest.fixture(scope="function")
 def test_db_session(test_db_engine) -> Generator[Session, None, None]:
     """Create a test database session"""
-    TestingSessionLocal = sessionmaker(
-        autocommit=False,
-        autoflush=False,
-        bind=test_db_engine
-    )
+    TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=test_db_engine)
     session = TestingSessionLocal()
     yield session
     session.close()
 
+
 @pytest.fixture(scope="function")
 def test_client(test_db_session) -> TestClient:
     """Create a test client with overridden database dependency"""
+
     def override_get_db():
         try:
             yield test_db_session
@@ -75,6 +77,7 @@ def test_client(test_db_session) -> TestClient:
     yield client
     app.dependency_overrides.clear()
 
+
 @pytest.fixture
 def mock_minio_client():
     """Mock MinIO client for storage tests"""
@@ -84,6 +87,7 @@ def mock_minio_client():
     mock_client.get_object.return_value = MagicMock()
     return mock_client
 
+
 @pytest.fixture
 def sample_image_file():
     """Create a sample image file for testing"""
@@ -92,16 +96,13 @@ def sample_image_file():
     from PIL import Image
 
     # Create a simple RGB image
-    img = Image.new('RGB', (100, 100), color='red')
+    img = Image.new("RGB", (100, 100), color="red")
     img_bytes = BytesIO()
-    img.save(img_bytes, format='PNG')
+    img.save(img_bytes, format="PNG")
     img_bytes.seek(0)
 
-    return {
-        "file": img_bytes,
-        "filename": "test_image.png",
-        "content_type": "image/png"
-    }
+    return {"file": img_bytes, "filename": "test_image.png", "content_type": "image/png"}
+
 
 @pytest.fixture
 def sample_audio_file():
@@ -109,8 +110,9 @@ def sample_audio_file():
     return {
         "file": BytesIO(b"fake audio content"),
         "filename": "test_audio.mp3",
-        "content_type": "audio/mpeg"
+        "content_type": "audio/mpeg",
     }
+
 
 @pytest.fixture
 def mock_settings():
@@ -121,10 +123,12 @@ def mock_settings():
     test_settings.database_url = TEST_DATABASE_URL
     return test_settings
 
+
 @pytest.fixture
 def auth_headers():
     """Mock authentication headers"""
     return {"Authorization": "Bearer test-token"}
+
 
 @pytest.fixture
 async def async_client(test_db_session):

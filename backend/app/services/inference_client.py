@@ -11,6 +11,7 @@ Key Features:
 - Comprehensive error handling and status tracking
 - Performance monitoring with latency tracking
 """
+
 import json
 import logging
 import os
@@ -43,7 +44,7 @@ class InferenceClient:
             "model_successes": 0,
             "model_failures": 0,
             "fallback_uses": 0,
-            "last_request_time": None
+            "last_request_time": None,
         }
 
     def _load_golden_samples(self):
@@ -55,28 +56,48 @@ class InferenceClient:
             "sample_simple_geometry.json": {
                 "keywords": ["simple", "basic", "geometry", "platform", "block", "minimal", "test"],
                 "complexity": 1,
-                "description": "Basic geometric shapes and simple platformer elements"
+                "description": "Basic geometric shapes and simple platformer elements",
             },
             "sample_asset_intensive.json": {
-                "keywords": ["asset", "texture", "sprite", "image", "audio", "resource", "forest", "animated", "detailed"],
+                "keywords": [
+                    "asset",
+                    "texture",
+                    "sprite",
+                    "image",
+                    "audio",
+                    "resource",
+                    "forest",
+                    "animated",
+                    "detailed",
+                ],
                 "complexity": 2,
-                "description": "Asset-heavy scene with textures, sprites, and audio resources"
+                "description": "Asset-heavy scene with textures, sprites, and audio resources",
             },
             "sample_complex_structure.json": {
-                "keywords": ["complex", "advanced", "layer", "nested", "puzzle", "mechanism", "trigger", "event", "script"],
+                "keywords": [
+                    "complex",
+                    "advanced",
+                    "layer",
+                    "nested",
+                    "puzzle",
+                    "mechanism",
+                    "trigger",
+                    "event",
+                    "script",
+                ],
                 "complexity": 3,
-                "description": "Complex nested structures with layers, events, and scripts"
+                "description": "Complex nested structures with layers, events, and scripts",
             },
             "sample_minimal_empty.json": {
                 "keywords": ["empty", "blank", "none", "minimal", "sandbox", "clean", "start"],
                 "complexity": 0,
-                "description": "Empty scene for testing edge cases and sandbox initialization"
+                "description": "Empty scene for testing edge cases and sandbox initialization",
             },
             "sample_single_entity.json": {
                 "keywords": ["single", "one", "solo", "minimal", "basic", "simple"],
                 "complexity": 0.5,
-                "description": "Minimal viable scene with a single entity"
-            }
+                "description": "Minimal viable scene with a single entity",
+            },
         }
 
         # Try to load from files
@@ -97,7 +118,7 @@ class InferenceClient:
                                 "keywords": meta["keywords"],
                                 "complexity": meta["complexity"],
                                 "description": meta["description"],
-                                "data": sample_data
+                                "data": sample_data,
                             }
                         else:
                             # Fallback for unknown samples
@@ -106,7 +127,7 @@ class InferenceClient:
                                 "keywords": [],
                                 "complexity": 1,
                                 "description": "Custom golden sample",
-                                "data": sample_data
+                                "data": sample_data,
                             }
 
                         self.golden_samples.append(sample_entry)
@@ -124,9 +145,7 @@ class InferenceClient:
             logger.error("No golden samples loaded - using minimal fallback")
 
     async def generate_scene(
-        self,
-        context: dict[str, Any],
-        model_version: str | None = None
+        self, context: dict[str, Any], model_version: str | None = None
     ) -> dict[str, Any]:
         """
         Generate a scene based on the provided context
@@ -169,12 +188,14 @@ class InferenceClient:
             latency_ms = int((time.time() - start_time) * 1000)
 
             metadata = {
-                "model_version": model_version or self.model_name if self.use_local_model else "fallback",
+                "model_version": (
+                    model_version or self.model_name if self.use_local_model else "fallback"
+                ),
                 "latency_ms": latency_ms,
                 "use_local_model": self.use_local_model,
                 "prompt_hash": context.get("prompt_hash"),
                 "status": status,
-                "timestamp": datetime.now(timezone.utc).isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat(),
             }
 
             if selected_sample:
@@ -183,10 +204,7 @@ class InferenceClient:
             if fallback_reason:
                 metadata["fallback_reason"] = fallback_reason
 
-            return {
-                "scene": result,
-                "metadata": metadata
-            }
+            return {"scene": result, "metadata": metadata}
 
         except Exception as e:
             logger.error(f"Critical error in scene generation: {e}")
@@ -202,14 +220,12 @@ class InferenceClient:
                     "use_local_model": self.use_local_model,
                     "status": "error",
                     "error": str(e),
-                    "timestamp": datetime.now(timezone.utc).isoformat()
-                }
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                },
             }
 
     async def _call_local_model(
-        self,
-        context: dict[str, Any],
-        model_version: str | None = None
+        self, context: dict[str, Any], model_version: str | None = None
     ) -> dict[str, Any]:
         """
         Call the local model endpoint (Ollama or similar)
@@ -232,20 +248,13 @@ class InferenceClient:
 The scene should include entities, positions, sizes, and properties.
 Return only valid JSON without any explanation.""",
             "stream": False,
-            "options": {
-                "temperature": 0.7,
-                "top_p": 0.9,
-                "max_tokens": 2048
-            }
+            "options": {"temperature": 0.7, "top_p": 0.9, "max_tokens": 2048},
         }
 
         try:
             # Attempt to call the local model
             async with httpx.AsyncClient(timeout=self.model_timeout) as client:
-                response = await client.post(
-                    f"{self.model_endpoint}/api/generate",
-                    json=payload
-                )
+                response = await client.post(f"{self.model_endpoint}/api/generate", json=payload)
                 response.raise_for_status()
 
                 # Parse the response
@@ -287,7 +296,7 @@ Return only valid JSON without any explanation.""",
 
             # Add complexity preference based on prompt
             if "simple" in user_prompt or "basic" in user_prompt:
-                score += (4 - sample["complexity"])  # Prefer simpler samples
+                score += 4 - sample["complexity"]  # Prefer simpler samples
             elif "complex" in user_prompt or "advanced" in user_prompt:
                 score += sample["complexity"]  # Prefer complex samples
 
@@ -323,7 +332,7 @@ Return only valid JSON without any explanation.""",
                 "width": 800,
                 "height": 600,
                 "background_color": "#333333",
-                "error_fallback": True
+                "error_fallback": True,
             },
             "entities": [
                 {
@@ -332,10 +341,7 @@ Return only valid JSON without any explanation.""",
                     "name": "Default Player",
                     "position": {"x": 100, "y": 300},
                     "size": {"width": 32, "height": 48},
-                    "properties": {
-                        "health": 100,
-                        "color": "#FF0000"
-                    }
+                    "properties": {"health": 100, "color": "#FF0000"},
                 },
                 {
                     "id": "platform_default",
@@ -343,12 +349,9 @@ Return only valid JSON without any explanation.""",
                     "name": "Default Ground",
                     "position": {"x": 0, "y": 400},
                     "size": {"width": 800, "height": 200},
-                    "properties": {
-                        "color": "#654321",
-                        "collision": True
-                    }
-                }
-            ]
+                    "properties": {"color": "#654321", "collision": True},
+                },
+            ],
         }
 
     def get_model_status(self) -> dict[str, Any]:
@@ -363,18 +366,19 @@ Return only valid JSON without any explanation.""",
                 {
                     "name": sample["name"],
                     "complexity": sample["complexity"],
-                    "description": sample["description"]
+                    "description": sample["description"],
                 }
                 for sample in self.golden_samples
             ],
             "status": "ready" if self.golden_samples else "degraded",
-            "statistics": self.stats
+            "statistics": self.stats,
         }
 
         # Check model connectivity if local model is enabled
         if self.use_local_model:
             try:
                 import httpx
+
                 # Quick connectivity check (synchronous for status endpoint)
                 with httpx.Client(timeout=2.0) as client:
                     response = client.get(f"{self.model_endpoint}/api/tags")
@@ -414,7 +418,7 @@ Return only valid JSON without any explanation.""",
                 "name": sample["name"],
                 "complexity": sample["complexity"],
                 "description": sample["description"],
-                "keywords": sample["keywords"]
+                "keywords": sample["keywords"],
             }
             for sample in self.golden_samples
         ]

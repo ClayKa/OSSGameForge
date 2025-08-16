@@ -1,6 +1,7 @@
 """
 Assets router for OSSGameForge API
 """
+
 import json
 import logging
 from pathlib import Path
@@ -26,6 +27,7 @@ from ..services import asset_service
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
+
 def load_mock_data():
     """Load mock data from JSON file"""
     mock_file = Path("/app/mocks/mock_data.json")
@@ -38,14 +40,19 @@ def load_mock_data():
             return json.load(f)
     return {"projects": [], "assets": [], "scenes": []}
 
-@router.post("/projects/{project_id}/assets", response_model=AssetUploadResponse, status_code=status.HTTP_202_ACCEPTED)
+
+@router.post(
+    "/projects/{project_id}/assets",
+    response_model=AssetUploadResponse,
+    status_code=status.HTTP_202_ACCEPTED,
+)
 async def upload_asset(
     project_id: str,
     background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
     user_consent: bool = Form(...),
     _tags: list[str] | None = Form(None),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Upload a new asset with consent validation and EXIF stripping"""
 
@@ -53,7 +60,7 @@ async def upload_asset(
     if not user_consent:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="User consent is mandatory and must be explicitly set to 'true'."
+            detail="User consent is mandatory and must be explicitly set to 'true'.",
         )
 
     # Read file content
@@ -64,7 +71,7 @@ async def upload_asset(
     if file_size > settings.max_upload_size:
         raise HTTPException(
             status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-            detail=f"File size exceeds maximum allowed size of {settings.max_upload_size} bytes"
+            detail=f"File size exceeds maximum allowed size of {settings.max_upload_size} bytes",
         )
 
     # Validate file type
@@ -72,17 +79,17 @@ async def upload_asset(
     if content_type.startswith("image/") and content_type not in settings.allowed_image_types:
         raise HTTPException(
             status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-            detail=f"Image type {content_type} is not supported"
+            detail=f"Image type {content_type} is not supported",
         )
     elif content_type.startswith("audio/") and content_type not in settings.allowed_audio_types:
         raise HTTPException(
             status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-            detail=f"Audio type {content_type} is not supported"
+            detail=f"Audio type {content_type} is not supported",
         )
     elif content_type.startswith("video/") and content_type not in settings.allowed_video_types:
         raise HTTPException(
             status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-            detail=f"Video type {content_type} is not supported"
+            detail=f"Video type {content_type} is not supported",
         )
 
     if settings.mock_mode:
@@ -92,7 +99,7 @@ async def upload_asset(
         return {
             "asset_id": asset_id,
             "status": "processing",
-            "message": "Asset upload initiated (mock mode)"
+            "message": "Asset upload initiated (mock mode)",
         }
 
     try:
@@ -102,43 +109,35 @@ async def upload_asset(
             project_id=project_id,
             filename=file.filename,
             content_type=content_type,
-            file_size=file_size
+            file_size=file_size,
         )
 
         # Process and store the file (includes EXIF stripping for images)
         await asset_service.process_and_store_file(
-            db=db,
-            asset=new_asset,
-            file_data=file_content,
-            original_filename=file.filename
+            db=db, asset=new_asset, file_data=file_content, original_filename=file.filename
         )
 
         # Add background task for metadata extraction
-        background_tasks.add_task(
-            asset_service.extract_metadata_task,
-            asset_id=str(new_asset.id)
-        )
+        background_tasks.add_task(asset_service.extract_metadata_task, asset_id=str(new_asset.id))
 
         logger.info(f"Asset {new_asset.id} uploaded successfully, processing in background")
 
         return {
             "asset_id": str(new_asset.id),
             "status": "processing",
-            "message": "Asset upload initiated successfully"
+            "message": "Asset upload initiated successfully",
         }
 
     except Exception as e:
         logger.error(f"Failed to upload asset: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to process asset upload: {str(e)}"
+            detail=f"Failed to process asset upload: {str(e)}",
         ) from e
 
+
 @router.get("/projects/{project_id}/assets", response_model=list[AssetResponse])
-async def list_project_assets(
-    project_id: str,
-    db: Session = Depends(get_db)
-):
+async def list_project_assets(project_id: str, db: Session = Depends(get_db)):
     """List all assets for a project"""
     if settings.mock_mode:
         data = load_mock_data()
@@ -160,16 +159,14 @@ async def list_project_assets(
             "consent_hash": asset.consent_hash,
             "exif_stripped": asset.exif_stripped,
             "created_at": asset.created_at.isoformat() if asset.created_at else None,
-            "updated_at": asset.updated_at.isoformat() if asset.updated_at else None
+            "updated_at": asset.updated_at.isoformat() if asset.updated_at else None,
         }
         for asset in assets
     ]
 
+
 @router.get("/assets/{asset_id}", response_model=AssetResponse)
-async def get_asset(
-    asset_id: str,
-    db: Session = Depends(get_db)
-):
+async def get_asset(asset_id: str, db: Session = Depends(get_db)):
     """Get asset details"""
     if settings.mock_mode:
         data = load_mock_data()
@@ -194,5 +191,5 @@ async def get_asset(
         "consent_hash": asset.consent_hash,
         "exif_stripped": asset.exif_stripped,
         "created_at": asset.created_at.isoformat() if asset.created_at else None,
-        "updated_at": asset.updated_at.isoformat() if asset.updated_at else None
+        "updated_at": asset.updated_at.isoformat() if asset.updated_at else None,
     }

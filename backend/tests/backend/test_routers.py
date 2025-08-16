@@ -1,6 +1,7 @@
 """
 Integration tests for API routers
 """
+
 from unittest.mock import patch
 
 from fastapi.testclient import TestClient
@@ -28,10 +29,10 @@ class TestHealthEndpoint:
 class TestProjectsRouter:
     """Test projects API endpoints"""
 
-    @patch('backend.app.config.settings.mock_mode', True)
+    @patch("backend.app.config.settings.mock_mode", True)
     def test_list_projects_mock_mode(self):
         """Test listing projects in mock mode"""
-        with patch('backend.app.routers.projects.load_mock_data') as mock_load:
+        with patch("backend.app.routers.projects.load_mock_data") as mock_load:
             mock_load.return_value = {
                 "projects": [
                     {
@@ -42,7 +43,7 @@ class TestProjectsRouter:
                         "created_at": "2024-01-01T00:00:00Z",
                         "updated_at": "2024-01-01T00:00:00Z",
                         "assets_count": 0,
-                        "scenes_count": 0
+                        "scenes_count": 0,
                     }
                 ]
             }
@@ -54,13 +55,10 @@ class TestProjectsRouter:
             assert len(data) > 0
             assert data[0]["id"] == "proj_001"
 
-    @patch('backend.app.config.settings.mock_mode', True)
+    @patch("backend.app.config.settings.mock_mode", True)
     def test_create_project_mock_mode(self):
         """Test creating a project in mock mode"""
-        project_data = {
-            "name": "New Project",
-            "description": "New project description"
-        }
+        project_data = {"name": "New Project", "description": "New project description"}
 
         response = client.post("/api/projects/", json=project_data)
         assert response.status_code == 201
@@ -70,10 +68,10 @@ class TestProjectsRouter:
         assert "id" in data
         assert "created_at" in data
 
-    @patch('backend.app.config.settings.mock_mode', True)
+    @patch("backend.app.config.settings.mock_mode", True)
     def test_get_project_mock_mode(self):
         """Test getting a single project in mock mode"""
-        with patch('backend.app.routers.projects.load_mock_data') as mock_load:
+        with patch("backend.app.routers.projects.load_mock_data") as mock_load:
             mock_load.return_value = {
                 "projects": [
                     {
@@ -84,7 +82,7 @@ class TestProjectsRouter:
                         "created_at": "2024-01-01T00:00:00Z",
                         "updated_at": "2024-01-01T00:00:00Z",
                         "assets_count": 0,
-                        "scenes_count": 0
+                        "scenes_count": 0,
                     }
                 ]
             }
@@ -94,10 +92,10 @@ class TestProjectsRouter:
             data = response.json()
             assert data["id"] == "proj_001"
 
-    @patch('backend.app.config.settings.mock_mode', True)
+    @patch("backend.app.config.settings.mock_mode", True)
     def test_get_project_not_found(self):
         """Test getting a non-existent project"""
-        with patch('backend.app.routers.projects.load_mock_data') as mock_load:
+        with patch("backend.app.routers.projects.load_mock_data") as mock_load:
             mock_load.return_value = {"projects": []}
 
             response = client.get("/api/projects/nonexistent")
@@ -107,49 +105,33 @@ class TestProjectsRouter:
 class TestAssetsRouter:
     """Test assets API endpoints"""
 
-    @patch('backend.app.config.settings.mock_mode', True)
+    @patch("backend.app.config.settings.mock_mode", True)
     def test_upload_asset_with_consent(self):
         """Test uploading an asset with user consent"""
         # Create a test file
-        files = {
-            'file': ('test.txt', b'test content', 'text/plain')
-        }
-        data = {
-            'user_consent': 'true'
-        }
+        files = {"file": ("test.txt", b"test content", "text/plain")}
+        data = {"user_consent": "true"}
 
-        response = client.post(
-            "/api/projects/proj_001/assets",
-            files=files,
-            data=data
-        )
+        response = client.post("/api/projects/proj_001/assets", files=files, data=data)
         assert response.status_code == 202
         result = response.json()
         assert "asset_id" in result
         assert result["status"] == "processing"
 
-    @patch('backend.app.config.settings.mock_mode', True)
+    @patch("backend.app.config.settings.mock_mode", True)
     def test_upload_asset_without_consent(self):
         """Test uploading an asset without user consent"""
-        files = {
-            'file': ('test.txt', b'test content', 'text/plain')
-        }
-        data = {
-            'user_consent': 'false'
-        }
+        files = {"file": ("test.txt", b"test content", "text/plain")}
+        data = {"user_consent": "false"}
 
-        response = client.post(
-            "/api/projects/proj_001/assets",
-            files=files,
-            data=data
-        )
+        response = client.post("/api/projects/proj_001/assets", files=files, data=data)
         assert response.status_code == 400
         assert "consent is required" in response.json()["detail"].lower()
 
-    @patch('backend.app.config.settings.mock_mode', True)
+    @patch("backend.app.config.settings.mock_mode", True)
     def test_list_project_assets(self):
         """Test listing assets for a project"""
-        with patch('backend.app.routers.assets.load_mock_data') as mock_load:
+        with patch("backend.app.routers.assets.load_mock_data") as mock_load:
             mock_load.return_value = {
                 "assets": [
                     {
@@ -162,7 +144,7 @@ class TestAssetsRouter:
                         "metadata": {},
                         "consent_hash": "abc123",
                         "exif_stripped": True,
-                        "created_at": "2024-01-01T00:00:00Z"
+                        "created_at": "2024-01-01T00:00:00Z",
                     }
                 ]
             }
@@ -173,10 +155,10 @@ class TestAssetsRouter:
             assert isinstance(data, list)
             assert len(data) > 0
 
-    @patch('backend.app.config.settings.mock_mode', True)
+    @patch("backend.app.config.settings.mock_mode", True)
     def test_get_asset(self):
         """Test getting a single asset"""
-        with patch('backend.app.routers.assets.load_mock_data') as mock_load:
+        with patch("backend.app.routers.assets.load_mock_data") as mock_load:
             mock_load.return_value = {
                 "assets": [
                     {
@@ -189,7 +171,7 @@ class TestAssetsRouter:
                         "metadata": {},
                         "consent_hash": "abc123",
                         "exif_stripped": True,
-                        "created_at": "2024-01-01T00:00:00Z"
+                        "created_at": "2024-01-01T00:00:00Z",
                     }
                 ]
             }
@@ -203,10 +185,10 @@ class TestAssetsRouter:
 class TestGenerationRouter:
     """Test generation API endpoints"""
 
-    @patch('backend.app.config.settings.mock_mode', True)
+    @patch("backend.app.config.settings.mock_mode", True)
     def test_generate_scene(self):
         """Test generating a scene from prompt"""
-        with patch('backend.app.routers.generation.load_mock_data') as mock_load:
+        with patch("backend.app.routers.generation.load_mock_data") as mock_load:
             mock_load.return_value = {
                 "generation_samples": [
                     {
@@ -219,18 +201,15 @@ class TestGenerationRouter:
                             "metadata": {
                                 "width": 1920,
                                 "height": 1080,
-                                "background_color": "#228B22"
+                                "background_color": "#228B22",
                             },
-                            "entities": []
-                        }
+                            "entities": [],
+                        },
                     }
                 ]
             }
 
-            generation_data = {
-                "prompt": "Create a forest level",
-                "project_id": "proj_001"
-            }
+            generation_data = {"prompt": "Create a forest level", "project_id": "proj_001"}
 
             response = client.post("/api/generate", json=generation_data)
             assert response.status_code == 200
@@ -240,10 +219,10 @@ class TestGenerationRouter:
             assert "generation_time" in data
             assert data["scene"]["project_id"] == "proj_001"
 
-    @patch('backend.app.config.settings.mock_mode', True)
+    @patch("backend.app.config.settings.mock_mode", True)
     def test_generate_scene_with_assets(self):
         """Test generating a scene with specific assets"""
-        with patch('backend.app.routers.generation.load_mock_data') as mock_load:
+        with patch("backend.app.routers.generation.load_mock_data") as mock_load:
             mock_load.return_value = {
                 "generation_samples": [
                     {
@@ -256,10 +235,10 @@ class TestGenerationRouter:
                             "metadata": {
                                 "width": 1920,
                                 "height": 1080,
-                                "background_color": "#87CEEB"
+                                "background_color": "#87CEEB",
                             },
-                            "entities": []
-                        }
+                            "entities": [],
+                        },
                     }
                 ]
             }
@@ -267,7 +246,7 @@ class TestGenerationRouter:
             generation_data = {
                 "prompt": "Create a level",
                 "project_id": "proj_001",
-                "assets": ["asset_001", "asset_002"]
+                "assets": ["asset_001", "asset_002"],
             }
 
             response = client.post("/api/generate", json=generation_data)
@@ -282,39 +261,30 @@ class TestGenerationRouter:
 class TestExportRouter:
     """Test export API endpoints"""
 
-    @patch('backend.app.config.settings.mock_mode', True)
+    @patch("backend.app.config.settings.mock_mode", True)
     def test_export_html5(self):
         """Test exporting a scene to HTML5"""
-        export_data = {
-            "scene_id": "scene_001",
-            "include_assets": True
-        }
+        export_data = {"scene_id": "scene_001", "include_assets": True}
 
         response = client.post("/api/export?engine=html5", json=export_data)
         assert response.status_code == 200
         assert response.headers["content-type"] == "application/zip"
         assert "attachment" in response.headers.get("content-disposition", "")
 
-    @patch('backend.app.config.settings.mock_mode', True)
+    @patch("backend.app.config.settings.mock_mode", True)
     def test_export_godot(self):
         """Test exporting a scene to Godot format"""
-        export_data = {
-            "scene_id": "scene_001",
-            "include_assets": False
-        }
+        export_data = {"scene_id": "scene_001", "include_assets": False}
 
         response = client.post("/api/export?engine=godot", json=export_data)
         assert response.status_code == 200
         assert response.headers["content-type"] == "text/plain"
         assert "attachment" in response.headers.get("content-disposition", "")
 
-    @patch('backend.app.config.settings.mock_mode', True)
+    @patch("backend.app.config.settings.mock_mode", True)
     def test_export_unsupported_engine(self):
         """Test exporting with unsupported engine"""
-        export_data = {
-            "scene_id": "scene_001",
-            "include_assets": True
-        }
+        export_data = {"scene_id": "scene_001", "include_assets": True}
 
         response = client.post("/api/export?engine=unity", json=export_data)
         assert response.status_code == 400

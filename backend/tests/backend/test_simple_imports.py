@@ -1,10 +1,12 @@
 """
 Simple tests to verify imports and basic functionality
 """
+
 import os
 import sys
 
-sys.path.insert(0, '/app')
+sys.path.insert(0, "/app")
+
 
 def test_import_schemas():
     """Test that schemas can be imported"""
@@ -18,6 +20,7 @@ def test_import_schemas():
     assert GameStyle.PLATFORMER == "platformer"
     assert ExportEngine.HTML5 == "html5"
 
+
 def test_import_config():
     """Test that config can be imported"""
     from app.config import Settings
@@ -25,6 +28,7 @@ def test_import_config():
     settings = Settings()
     assert settings.app_name == "OSSGameForge"
     assert settings.app_version == "0.1.0"
+
 
 def test_import_routers():
     """Test that routers can be imported"""
@@ -35,13 +39,15 @@ def test_import_routers():
     assert generation.router is not None
     assert export.router is not None
 
+
 def test_mock_mode_env():
     """Test mock mode environment variable"""
-    os.environ['MOCK_MODE'] = 'true'
+    os.environ["MOCK_MODE"] = "true"
     from app.config import Settings
 
     settings = Settings()
     assert settings.mock_mode is True
+
 
 def test_api_endpoints_exist():
     """Test that API endpoints are registered"""
@@ -53,6 +59,7 @@ def test_api_endpoints_exist():
     assert "/" in routes
     assert "/api/projects/" in routes or "/api/projects/{project_id}" in routes
     assert "/api/generate" in routes
+
 
 if __name__ == "__main__":
     test_import_schemas()

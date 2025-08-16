@@ -2,6 +2,7 @@
 OSSGameForge Backend API
 Main FastAPI application entry point
 """
+
 import logging
 from contextlib import asynccontextmanager
 
@@ -14,10 +15,10 @@ from .routers import assets, export, generation, health, projects
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
+
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
@@ -42,12 +43,13 @@ async def lifespan(_: FastAPI):
     # Shutdown
     logger.info("Shutting down OSSGameForge Backend...")
 
+
 # Create FastAPI app
 app = FastAPI(
     title="OSSGameForge API",
     description="AI-powered game creation suite backend",
     version="0.1.0",
-    lifespan=lifespan
+    lifespan=lifespan,
 )
 
 # Configure CORS
@@ -62,17 +64,15 @@ app.add_middleware(
 # Include health router for comprehensive health checks
 app.include_router(health.router, prefix="/health", tags=["Health"])
 
+
 # Root endpoint
 @app.get("/")
 async def root():
     """
     Root endpoint with API information
     """
-    return {
-        "message": "Welcome to OSSGameForge API",
-        "documentation": "/docs",
-        "health": "/health"
-    }
+    return {"message": "Welcome to OSSGameForge API", "documentation": "/docs", "health": "/health"}
+
 
 # Register routers
 app.include_router(projects.router, prefix="/api/projects", tags=["Projects"])

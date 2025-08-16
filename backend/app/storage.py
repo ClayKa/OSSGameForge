@@ -4,6 +4,7 @@ Storage management for OSSGameForge using MinIO
 Provides functions for uploading, downloading, and managing files in MinIO
 object storage with proper error handling and logging.
 """
+
 import io
 import logging
 import os
@@ -15,6 +16,7 @@ logger = logging.getLogger(__name__)
 
 # Initialize MinIO client
 minio_client = None
+
 
 def get_minio_client() -> Minio:
     """
@@ -32,10 +34,7 @@ def get_minio_client() -> Minio:
         secure = os.getenv("MINIO_SECURE", "false").lower() == "true"
 
         minio_client = Minio(
-            endpoint=endpoint,
-            access_key=access_key,
-            secret_key=secret_key,
-            secure=secure
+            endpoint=endpoint, access_key=access_key, secret_key=secret_key, secure=secure
         )
 
         logger.info(f"Initialized MinIO client for endpoint: {endpoint}")
@@ -52,7 +51,7 @@ def upload_file_to_storage(
     object_name: str,
     data: io.BytesIO,
     length: int,
-    content_type: str = "application/octet-stream"
+    content_type: str = "application/octet-stream",
 ) -> bool:
     """
     Upload file to MinIO storage
@@ -81,7 +80,7 @@ def upload_file_to_storage(
             object_name=object_name,
             data=data,
             length=length,
-            content_type=content_type
+            content_type=content_type,
         )
 
         logger.info(f"Uploaded {object_name} to {bucket_name}")
@@ -95,10 +94,7 @@ def upload_file_to_storage(
         return False
 
 
-def download_file_from_storage(
-    bucket_name: str,
-    object_name: str
-) -> bytes | None:
+def download_file_from_storage(bucket_name: str, object_name: str) -> bytes | None:
     """
     Download file from MinIO storage
 
@@ -129,10 +125,7 @@ def download_file_from_storage(
         return None
 
 
-def delete_file_from_storage(
-    bucket_name: str,
-    object_name: str
-) -> bool:
+def delete_file_from_storage(bucket_name: str, object_name: str) -> bool:
     """
     Delete file from MinIO storage
 
@@ -157,11 +150,7 @@ def delete_file_from_storage(
         return False
 
 
-def get_file_url(
-    bucket_name: str,
-    object_name: str,
-    expires_in: int = 3600
-) -> str | None:
+def get_file_url(bucket_name: str, object_name: str, expires_in: int = 3600) -> str | None:
     """
     Generate presigned URL for file access
 
@@ -176,9 +165,7 @@ def get_file_url(
     try:
         client = get_minio_client()
         url = client.presigned_get_object(
-            bucket_name=bucket_name,
-            object_name=object_name,
-            expires=expires_in
+            bucket_name=bucket_name, object_name=object_name, expires=expires_in
         )
         return url
 
@@ -190,10 +177,7 @@ def get_file_url(
         return None
 
 
-def list_objects(
-    bucket_name: str,
-    prefix: str | None = None
-) -> list:
+def list_objects(bucket_name: str, prefix: str | None = None) -> list:
     """
     List objects in a bucket with optional prefix filter
 
@@ -206,11 +190,7 @@ def list_objects(
     """
     try:
         client = get_minio_client()
-        objects = client.list_objects(
-            bucket_name=bucket_name,
-            prefix=prefix,
-            recursive=True
-        )
+        objects = client.list_objects(bucket_name=bucket_name, prefix=prefix, recursive=True)
 
         return [obj.object_name for obj in objects]
 
@@ -237,12 +217,12 @@ def check_storage_health() -> dict:
         return {
             "status": "healthy",
             "buckets_count": len(buckets),
-            "endpoint": os.getenv("MINIO_ENDPOINT", "localhost:9000")
+            "endpoint": os.getenv("MINIO_ENDPOINT", "localhost:9000"),
         }
 
     except Exception as e:
         return {
             "status": "unhealthy",
             "error": str(e),
-            "endpoint": os.getenv("MINIO_ENDPOINT", "localhost:9000")
+            "endpoint": os.getenv("MINIO_ENDPOINT", "localhost:9000"),
         }

@@ -25,10 +25,7 @@ class TestProjectSchemas:
 
     def test_project_create_valid(self):
         """Test creating a valid project"""
-        data = {
-            "name": "Test Project",
-            "description": "A test project"
-        }
+        data = {"name": "Test Project", "description": "A test project"}
         project = ProjectCreate(**data)
         assert project.name == "Test Project"
         assert project.description == "A test project"
@@ -58,7 +55,7 @@ class TestProjectSchemas:
             "created_at": "2024-01-01T00:00:00Z",
             "updated_at": "2024-01-01T00:00:00Z",
             "assets_count": 5,
-            "scenes_count": 2
+            "scenes_count": 2,
         }
         project = ProjectResponse(**data)
         assert project.id == "proj_001"
@@ -91,11 +88,7 @@ class TestAssetSchemas:
 
     def test_asset_upload_response(self):
         """Test asset upload response schema"""
-        data = {
-            "asset_id": "asset_001",
-            "status": "processing",
-            "message": "Upload initiated"
-        }
+        data = {"asset_id": "asset_001", "status": "processing", "message": "Upload initiated"}
         response = AssetUploadResponse(**data)
         assert response.asset_id == "asset_001"
         assert response.status == AssetStatus.PROCESSING
@@ -112,7 +105,7 @@ class TestAssetSchemas:
             "metadata": {"width": 100, "height": 100},
             "consent_hash": "abc123",
             "exif_stripped": True,
-            "created_at": "2024-01-01T00:00:00Z"
+            "created_at": "2024-01-01T00:00:00Z",
         }
         asset = AssetResponse(**data)
         assert asset.id == "asset_001"
@@ -162,13 +155,8 @@ class TestGenerationSchemas:
             "size": {"width": 50, "height": 50},
             "sprite": "/assets/player.png",
             "color": "#FF0000",
-            "physics": {
-                "gravity": True,
-                "collision": True,
-                "static": False,
-                "mass": 1.0
-            },
-            "properties": {"health": 100}
+            "physics": {"gravity": True, "collision": True, "static": False, "mass": 1.0},
+            "properties": {"health": 100},
         }
         entity = Entity(**data)
         assert entity.id == "entity_001"
@@ -183,7 +171,7 @@ class TestGenerationSchemas:
             "height": 1080,
             "background_color": "#87CEEB",
             "theme": "forest",
-            "used_assets": ["asset_001", "asset_002"]
+            "used_assets": ["asset_001", "asset_002"],
         }
         metadata = SceneMetadata(**data)
         assert metadata.width == 1920
@@ -196,7 +184,7 @@ class TestGenerationSchemas:
             "prompt": "Create a platformer level",
             "project_id": "proj_001",
             "assets": ["asset_001"],
-            "style": "platformer"
+            "style": "platformer",
         }
         request = GenerationRequest(**data)
         assert request.prompt == "Create a platformer level"
@@ -222,15 +210,11 @@ class TestGenerationSchemas:
                 "name": "Test Scene",
                 "description": "A test scene",
                 "version": "1.0.0",
-                "metadata": {
-                    "width": 1920,
-                    "height": 1080,
-                    "background_color": "#87CEEB"
-                },
+                "metadata": {"width": 1920, "height": 1080, "background_color": "#87CEEB"},
                 "entities": [],
-                "created_at": "2024-01-01T00:00:00Z"
+                "created_at": "2024-01-01T00:00:00Z",
             },
-            "generation_time": 1.5
+            "generation_time": 1.5,
         }
         response = GenerationResponse(**data)
         assert response.scene_id == "scene_001"
@@ -248,10 +232,7 @@ class TestExportSchemas:
 
     def test_export_request(self):
         """Test export request schema"""
-        data = {
-            "scene_id": "scene_001",
-            "include_assets": True
-        }
+        data = {"scene_id": "scene_001", "include_assets": True}
         request = ExportRequest(**data)
         assert request.scene_id == "scene_001"
         assert request.include_assets is True

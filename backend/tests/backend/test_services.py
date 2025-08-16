@@ -1,6 +1,7 @@
 """
 Tests for backend services
 """
+
 import json
 from unittest.mock import mock_open, patch
 
@@ -21,7 +22,7 @@ class TestConfiguration:
         assert settings.mock_mode is False
         assert settings.use_local_model is False
 
-    @patch.dict('os.environ', {'MOCK_MODE': 'true', 'USE_LOCAL_MODEL': 'true'})
+    @patch.dict("os.environ", {"MOCK_MODE": "true", "USE_LOCAL_MODEL": "true"})
     def test_settings_from_environment(self):
         """Test settings from environment variables"""
         settings = Settings()
@@ -48,27 +49,25 @@ class TestMockDataLoading:
 
     def test_load_mock_data_file_exists(self):
         """Test loading mock data when file exists"""
-        mock_data = {
-            "projects": [{"id": "proj_001", "name": "Test"}],
-            "assets": [],
-            "scenes": []
-        }
+        mock_data = {"projects": [{"id": "proj_001", "name": "Test"}], "assets": [], "scenes": []}
 
         # Import the function to test
         from backend.app.routers.projects import load_mock_data
 
-        with patch('pathlib.Path.exists', return_value=True), \
-             patch('builtins.open', mock_open(read_data=json.dumps(mock_data))):
-                result = load_mock_data()
-                assert "projects" in result
-                assert len(result["projects"]) == 1
-                assert result["projects"][0]["id"] == "proj_001"
+        with (
+            patch("pathlib.Path.exists", return_value=True),
+            patch("builtins.open", mock_open(read_data=json.dumps(mock_data))),
+        ):
+            result = load_mock_data()
+            assert "projects" in result
+            assert len(result["projects"]) == 1
+            assert result["projects"][0]["id"] == "proj_001"
 
     def test_load_mock_data_file_not_exists(self):
         """Test loading mock data when file doesn't exist"""
         from backend.app.routers.projects import load_mock_data
 
-        with patch('pathlib.Path.exists', return_value=False):
+        with patch("pathlib.Path.exists", return_value=False):
             result = load_mock_data()
             assert result == {"projects": [], "assets": [], "scenes": []}
 
@@ -76,20 +75,19 @@ class TestMockDataLoading:
         """Test loading mock data with generation samples"""
         mock_data = {
             "generation_samples": [
-                {
-                    "prompt": "Create a level",
-                    "scene": {"id": "scene_001", "name": "Test Scene"}
-                }
+                {"prompt": "Create a level", "scene": {"id": "scene_001", "name": "Test Scene"}}
             ]
         }
 
         from backend.app.routers.generation import load_mock_data
 
-        with patch('pathlib.Path.exists', return_value=True), \
-             patch('builtins.open', mock_open(read_data=json.dumps(mock_data))):
-                result = load_mock_data()
-                assert "generation_samples" in result
-                assert len(result["generation_samples"]) == 1
+        with (
+            patch("pathlib.Path.exists", return_value=True),
+            patch("builtins.open", mock_open(read_data=json.dumps(mock_data))),
+        ):
+            result = load_mock_data()
+            assert "generation_samples" in result
+            assert len(result["generation_samples"]) == 1
 
 
 class TestUtilityFunctions:
@@ -103,11 +101,7 @@ class TestUtilityFunctions:
             "id": "scene_001",
             "name": "Test Scene",
             "description": "A test scene",
-            "metadata": {
-                "width": 800,
-                "height": 600,
-                "background_color": "#000000"
-            },
+            "metadata": {"width": 800, "height": 600, "background_color": "#000000"},
             "entities": [
                 {
                     "id": "entity_001",
@@ -115,9 +109,9 @@ class TestUtilityFunctions:
                     "name": "Player",
                     "position": {"x": 100, "y": 100},
                     "size": {"width": 50, "height": 50},
-                    "color": "#FF0000"
+                    "color": "#FF0000",
                 }
-            ]
+            ],
         }
 
         result = create_html5_export(scene_data)
@@ -150,7 +144,9 @@ class TestErrorHandling:
 
         if not user_consent:
             with pytest.raises(HTTPException) as exc_info:
-                raise HTTPException(status_code=400, detail="User consent is required for asset upload")
+                raise HTTPException(
+                    status_code=400, detail="User consent is required for asset upload"
+                )
 
             assert exc_info.value.status_code == 400
             assert "consent is required" in exc_info.value.detail.lower()
@@ -168,7 +164,7 @@ class TestErrorHandling:
             with pytest.raises(HTTPException) as exc_info:
                 raise HTTPException(
                     status_code=413,
-                    detail=f"File size exceeds maximum allowed size of {settings.max_upload_size} bytes"
+                    detail=f"File size exceeds maximum allowed size of {settings.max_upload_size} bytes",
                 )
 
             assert exc_info.value.status_code == 413

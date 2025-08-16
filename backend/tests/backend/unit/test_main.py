@@ -1,6 +1,7 @@
 """
 Unit tests for main FastAPI application
 """
+
 import os
 import sys
 from unittest.mock import patch
@@ -9,7 +10,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 # Add backend to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', '..', 'backend'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "..", "backend"))
 
 from backend.app.main import app, lifespan
 
@@ -29,21 +30,21 @@ class TestMainApp:
         # Check if CORS middleware is in the middleware stack
         middleware_found = False
         for middleware in app.user_middleware:
-            if middleware.cls.__name__ == 'CORSMiddleware':
+            if middleware.cls.__name__ == "CORSMiddleware":
                 middleware_found = True
                 # Check CORS settings - access kwargs instead of options
-                if hasattr(middleware, 'kwargs'):
-                    assert "http://localhost:3000" in middleware.kwargs.get('allow_origins', [])
-                    assert "http://localhost:5173" in middleware.kwargs.get('allow_origins', [])
-                    assert middleware.kwargs.get('allow_credentials')
-                    assert middleware.kwargs.get('allow_methods') == ["*"]
-                    assert middleware.kwargs.get('allow_headers') == ["*"]
+                if hasattr(middleware, "kwargs"):
+                    assert "http://localhost:3000" in middleware.kwargs.get("allow_origins", [])
+                    assert "http://localhost:5173" in middleware.kwargs.get("allow_origins", [])
+                    assert middleware.kwargs.get("allow_credentials")
+                    assert middleware.kwargs.get("allow_methods") == ["*"]
+                    assert middleware.kwargs.get("allow_headers") == ["*"]
                 break
 
         assert middleware_found, "CORS middleware not found"
 
     @pytest.mark.asyncio
-    @patch('backend.app.main.logger')
+    @patch("backend.app.main.logger")
     @patch.dict(os.environ, {"MOCK_MODE": "true", "USE_LOCAL_MODEL": "false"})
     async def test_lifespan_startup(self, mock_logger):
         """Test lifespan context manager startup"""
@@ -54,7 +55,7 @@ class TestMainApp:
             mock_logger.info.assert_any_call("Local Model: false")
 
     @pytest.mark.asyncio
-    @patch('backend.app.main.logger')
+    @patch("backend.app.main.logger")
     async def test_lifespan_shutdown(self, mock_logger):
         """Test lifespan context manager shutdown"""
         async with lifespan(app) as _:

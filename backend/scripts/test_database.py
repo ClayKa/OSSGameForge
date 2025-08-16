@@ -6,7 +6,7 @@ Run this inside the Docker container to verify Task 1.3 completion.
 """
 import sys
 
-sys.path.insert(0, '/app')
+sys.path.insert(0, "/app")
 
 import logging
 
@@ -20,9 +20,9 @@ logger = logging.getLogger(__name__)
 
 def test_database_connection():
     """Test basic database connectivity"""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("Testing Database Connection")
-    print("="*60)
+    print("=" * 60)
 
     if check_db_connection():
         print("✅ Database connection successful")
@@ -34,14 +34,14 @@ def test_database_connection():
 
 def test_tables_exist():
     """Verify that all required tables exist"""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("Verifying Database Tables")
-    print("="*60)
+    print("=" * 60)
 
     inspector = inspect(engine)
     existing_tables = inspector.get_table_names()
 
-    required_tables = ['assets', 'generation_logs', 'projects', 'scenes']
+    required_tables = ["assets", "generation_logs", "projects", "scenes"]
 
     all_exist = True
     for table in required_tables:
@@ -61,23 +61,59 @@ def test_tables_exist():
 
 def test_table_columns():
     """Verify that tables have the correct columns"""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("Verifying Table Schemas")
-    print("="*60)
+    print("=" * 60)
 
     inspector = inspect(engine)
 
     # Define expected columns for each table
     expected_columns = {
-        'assets': ['id', 'project_id', 'path', 'type', 'status', 'metadata',
-                   'consent_hash', 'exif_stripped', 'created_at', 'updated_at'],
-        'generation_logs': ['id', 'user_id', 'input_hash', 'prompt_hash',
-                           'model_version', 'lora_adapter', 'status',
-                           'latency_ms', 'error', 'created_at'],
-        'projects': ['id', 'name', 'description', 'owner', 'status',
-                    'settings', 'created_at', 'updated_at'],
-        'scenes': ['id', 'project_id', 'name', 'style', 'scene_data',
-                  'thumbnail_path', 'generation_log_id', 'created_at', 'updated_at']
+        "assets": [
+            "id",
+            "project_id",
+            "path",
+            "type",
+            "status",
+            "metadata",
+            "consent_hash",
+            "exif_stripped",
+            "created_at",
+            "updated_at",
+        ],
+        "generation_logs": [
+            "id",
+            "user_id",
+            "input_hash",
+            "prompt_hash",
+            "model_version",
+            "lora_adapter",
+            "status",
+            "latency_ms",
+            "error",
+            "created_at",
+        ],
+        "projects": [
+            "id",
+            "name",
+            "description",
+            "owner",
+            "status",
+            "settings",
+            "created_at",
+            "updated_at",
+        ],
+        "scenes": [
+            "id",
+            "project_id",
+            "name",
+            "style",
+            "scene_data",
+            "thumbnail_path",
+            "generation_log_id",
+            "created_at",
+            "updated_at",
+        ],
     }
 
     all_correct = True
@@ -85,7 +121,7 @@ def test_table_columns():
         print(f"\n{table_name} table:")
 
         try:
-            columns = [col['name'] for col in inspector.get_columns(table_name)]
+            columns = [col["name"] for col in inspector.get_columns(table_name)]
 
             # Check for expected columns
             for col in expected_cols:
@@ -109,18 +145,16 @@ def test_table_columns():
 
 def test_crud_operations():
     """Test basic CRUD operations"""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("Testing CRUD Operations")
-    print("="*60)
+    print("=" * 60)
 
     db = SessionLocal()
 
     try:
         # Test Project creation
         test_project = Project(
-            name="Test Project",
-            description="Created by test script",
-            owner="test_user"
+            name="Test Project", description="Created by test script", owner="test_user"
         )
         db.add(test_project)
         db.commit()
@@ -132,7 +166,7 @@ def test_crud_operations():
             path="/test/path/image.png",
             type="image",
             consent_hash="test_hash_123",
-            exif_stripped=True
+            exif_stripped=True,
         )
         db.add(test_asset)
         db.commit()
@@ -145,7 +179,7 @@ def test_crud_operations():
             prompt_hash="prompt_456",
             model_version="test_v1",
             status="success",
-            latency_ms=1000
+            latency_ms=1000,
         )
         db.add(test_log)
         db.commit()
@@ -156,7 +190,7 @@ def test_crud_operations():
             project_id=str(test_project.id),
             name="Test Scene",
             style="platformer",
-            scene_data={"entities": [], "metadata": {}}
+            scene_data={"entities": [], "metadata": {}},
         )
         db.add(test_scene)
         db.commit()
@@ -194,22 +228,22 @@ def test_crud_operations():
 
 def main():
     """Run all database tests"""
-    print("="*70)
+    print("=" * 70)
     print("OSSGameForge Database Verification")
     print("Task 1.3 Completion Test")
-    print("="*70)
+    print("=" * 70)
 
     results = {
         "Connection": test_database_connection(),
         "Tables Exist": test_tables_exist(),
         "Table Schemas": test_table_columns(),
-        "CRUD Operations": test_crud_operations()
+        "CRUD Operations": test_crud_operations(),
     }
 
     # Summary
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("Test Summary")
-    print("="*70)
+    print("=" * 70)
 
     all_passed = True
     for test_name, passed in results.items():

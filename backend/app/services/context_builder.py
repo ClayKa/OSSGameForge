@@ -5,6 +5,7 @@ This service is responsible for constructing prompts for AI generation.
 It takes user input and project context to create optimized prompts
 for the inference engine.
 """
+
 import hashlib
 import json
 from typing import Any
@@ -23,7 +24,7 @@ class ContextBuilder:
         project_id: str,
         assets: list[dict[str, Any]] | None = None,
         style: str | None = None,
-        additional_context: dict[str, Any] | None = None
+        additional_context: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         """
         Build a structured prompt for scene generation
@@ -43,7 +44,7 @@ class ContextBuilder:
             "user_prompt": user_prompt,
             "project_id": project_id,
             "style": style or "platformer",
-            "timestamp": self._get_timestamp()
+            "timestamp": self._get_timestamp(),
         }
 
         # Add asset context if provided
@@ -64,10 +65,7 @@ class ContextBuilder:
         return context
 
     def build_editing_context(
-        self,
-        scene_id: str,
-        modifications: dict[str, Any],
-        current_scene: dict[str, Any]
+        self, scene_id: str, modifications: dict[str, Any], current_scene: dict[str, Any]
     ) -> dict[str, Any]:
         """
         Build context for scene editing operations
@@ -85,7 +83,7 @@ class ContextBuilder:
             "modifications": modifications,
             "current_state": current_scene,
             "operation": "edit",
-            "timestamp": self._get_timestamp()
+            "timestamp": self._get_timestamp(),
         }
 
     def validate_context(self, context: dict[str, Any]) -> bool:
@@ -109,12 +107,14 @@ class ContextBuilder:
         """Process and filter assets for context inclusion"""
         processed = []
         for asset in assets[:50]:  # Limit to prevent context overflow
-            processed.append({
-                "id": asset.get("id"),
-                "type": asset.get("type"),
-                "name": asset.get("name", ""),
-                "metadata": self._extract_relevant_metadata(asset.get("metadata", {}))
-            })
+            processed.append(
+                {
+                    "id": asset.get("id"),
+                    "type": asset.get("type"),
+                    "name": asset.get("name", ""),
+                    "metadata": self._extract_relevant_metadata(asset.get("metadata", {})),
+                }
+            )
         return processed
 
     def _extract_relevant_metadata(self, metadata: dict[str, Any]) -> dict[str, Any]:
@@ -127,7 +127,9 @@ class ContextBuilder:
         style = context.get("style", "platformer")
         asset_count = context.get("asset_count", 0)
 
-        engineered = f"Create a {style} game scene based on the following description: {user_prompt}"
+        engineered = (
+            f"Create a {style} game scene based on the following description: {user_prompt}"
+        )
 
         if asset_count > 0:
             engineered += f" The scene should incorporate {asset_count} available assets."
@@ -139,17 +141,21 @@ class ContextBuilder:
     def _generate_prompt_hash(self, context: dict[str, Any]) -> str:
         """Generate a hash for prompt caching"""
         # Create a deterministic string representation
-        hash_input = json.dumps({
-            "prompt": context.get("user_prompt", ""),
-            "style": context.get("style", ""),
-            "assets": len(context.get("assets", []))
-        }, sort_keys=True)
+        hash_input = json.dumps(
+            {
+                "prompt": context.get("user_prompt", ""),
+                "style": context.get("style", ""),
+                "assets": len(context.get("assets", [])),
+            },
+            sort_keys=True,
+        )
 
         return hashlib.sha256(hash_input.encode()).hexdigest()
 
     def _get_timestamp(self) -> str:
         """Get current timestamp"""
         from datetime import datetime, timezone
+
         return datetime.now(timezone.utc).isoformat()
 
 

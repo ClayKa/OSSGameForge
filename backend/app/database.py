@@ -1,6 +1,7 @@
 """
 Database configuration and session management
 """
+
 import logging
 from collections.abc import Generator
 
@@ -18,18 +19,15 @@ engine = create_engine(
     pool_pre_ping=True,  # Verify connections before using
     pool_size=10,
     max_overflow=20,
-    echo=settings.debug  # Log SQL queries in debug mode
+    echo=settings.debug,  # Log SQL queries in debug mode
 )
 
 # Create SessionLocal class
-SessionLocal = sessionmaker(
-    autocommit=False,
-    autoflush=False,
-    bind=engine
-)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # Create Base class for models
 Base = declarative_base()
+
 
 def get_db() -> Generator[Session, None, None]:
     """
@@ -42,6 +40,7 @@ def get_db() -> Generator[Session, None, None]:
     finally:
         db.close()
 
+
 def init_db():
     """
     Initialize database tables
@@ -50,6 +49,7 @@ def init_db():
     try:
         # Import all models to ensure they are registered
         from . import models  # This imports all models from models/__init__.py  # noqa: F401
+
         # Create all tables
         Base.metadata.create_all(bind=engine)
         logger.info("Database tables created successfully")
@@ -57,12 +57,14 @@ def init_db():
         logger.error(f"Error initializing database: {e}")
         raise
 
+
 def check_db_connection():
     """
     Check if database is accessible
     """
     try:
         from sqlalchemy import text
+
         db = SessionLocal()
         db.execute(text("SELECT 1"))
         db.close()

@@ -7,19 +7,26 @@ from pydantic import BaseModel, Field
 
 class ProjectBase(BaseModel):
     """Base project schema"""
+
     name: str = Field(..., min_length=1, max_length=100)
     description: str | None = Field(None, max_length=500)
 
+
 class ProjectCreate(ProjectBase):
     """Schema for creating a project"""
+
     pass
+
 
 class ProjectUpdate(ProjectBase):
     """Schema for updating a project"""
+
     name: str | None = Field(None, min_length=1, max_length=100)
+
 
 class ProjectResponse(ProjectBase):
     """Schema for project response"""
+
     id: str
     owner: str
     created_at: str
@@ -30,6 +37,8 @@ class ProjectResponse(ProjectBase):
     class Config:
         from_attributes = True
 
+
 class Project(ProjectResponse):
     """Full project schema"""
+
     pass
