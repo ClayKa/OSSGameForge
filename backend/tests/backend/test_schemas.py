@@ -3,8 +3,6 @@ Tests for Pydantic schemas
 """
 
 import pytest
-from pydantic import ValidationError
-
 from app.schemas.asset import AssetResponse, AssetStatus, AssetType, AssetUploadResponse
 from app.schemas.export import ExportEngine, ExportRequest
 from app.schemas.generation import (
@@ -18,6 +16,7 @@ from app.schemas.generation import (
     Size,
 )
 from app.schemas.project import ProjectCreate, ProjectResponse, ProjectUpdate
+from pydantic import ValidationError
 
 
 class TestProjectSchemas:

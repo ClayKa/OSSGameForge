@@ -87,6 +87,7 @@ credentials/
 # ML Model Files (too large for git)
 *.h5
 *.pkl
+*.model
 *.weights
 *.ckpt
 *.pth

@@ -6,7 +6,6 @@ import json
 from unittest.mock import mock_open, patch
 
 import pytest
-
 from app.config import Settings
 
 
@@ -153,9 +152,8 @@ class TestErrorHandling:
 
     def test_file_size_validation(self):
         """Test file size validation"""
-        from fastapi import HTTPException
-
         from app.config import Settings
+        from fastapi import HTTPException
 
         settings = Settings()
         file_size = 150 * 1024 * 1024  # 150MB
