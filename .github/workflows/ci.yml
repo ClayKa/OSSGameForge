@@ -45,6 +45,7 @@ jobs:
 
       - name: Run MyPy type checking
         run: |
+          cd backend
           mypy backend --ignore-missing-imports
 
       - name: Run Bandit security linting
@@ -95,6 +96,7 @@ jobs:
           MOCK_MODE: true
           USE_LOCAL_MODEL: false
         run: |
+          cd backend
           pytest tests/backend \
             --cov=backend \
             --cov-report=xml \
