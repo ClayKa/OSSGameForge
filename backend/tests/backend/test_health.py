@@ -12,10 +12,12 @@ def test_health_check(test_client: TestClient):
 
     data = response.json()
     assert data["status"] == "healthy"
-    assert data["service"] == "ossgameforge-backend"
     assert "version" in data
-    assert "mock_mode" in data
-    assert "use_local_model" in data
+    assert "environment" in data
+    assert "services" in data
+    assert "database" in data["services"]
+    assert "storage" in data["services"]
+    assert "inference" in data["services"]
 
 
 def test_root_endpoint(test_client: TestClient):

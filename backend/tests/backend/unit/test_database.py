@@ -14,7 +14,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "..", "ba
 
 import contextlib
 
-from backend.app.database import Base, SessionLocal, check_db_connection, engine, get_db, init_db
+from app.database import Base, SessionLocal, check_db_connection, engine, get_db, init_db
 
 
 class TestDatabase:

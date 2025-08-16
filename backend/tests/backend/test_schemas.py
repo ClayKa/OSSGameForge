@@ -5,9 +5,9 @@ Tests for Pydantic schemas
 import pytest
 from pydantic import ValidationError
 
-from backend.app.schemas.asset import AssetResponse, AssetStatus, AssetType, AssetUploadResponse
-from backend.app.schemas.export import ExportEngine, ExportRequest
-from backend.app.schemas.generation import (
+from app.schemas.asset import AssetResponse, AssetStatus, AssetType, AssetUploadResponse
+from app.schemas.export import ExportEngine, ExportRequest
+from app.schemas.generation import (
     Entity,
     EntityType,
     GameStyle,
@@ -17,7 +17,7 @@ from backend.app.schemas.generation import (
     SceneMetadata,
     Size,
 )
-from backend.app.schemas.project import ProjectCreate, ProjectResponse, ProjectUpdate
+from app.schemas.project import ProjectCreate, ProjectResponse, ProjectUpdate
 
 
 class TestProjectSchemas:

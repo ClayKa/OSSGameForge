@@ -7,7 +7,7 @@ from unittest.mock import mock_open, patch
 
 import pytest
 
-from backend.app.config import Settings
+from app.config import Settings
 
 
 class TestConfiguration:
@@ -52,7 +52,7 @@ class TestMockDataLoading:
         mock_data = {"projects": [{"id": "proj_001", "name": "Test"}], "assets": [], "scenes": []}
 
         # Import the function to test
-        from backend.app.routers.projects import load_mock_data
+        from app.routers.projects import load_mock_data
 
         with (
             patch("pathlib.Path.exists", return_value=True),
@@ -65,7 +65,7 @@ class TestMockDataLoading:
 
     def test_load_mock_data_file_not_exists(self):
         """Test loading mock data when file doesn't exist"""
-        from backend.app.routers.projects import load_mock_data
+        from app.routers.projects import load_mock_data
 
         with patch("pathlib.Path.exists", return_value=False):
             result = load_mock_data()
@@ -79,7 +79,7 @@ class TestMockDataLoading:
             ]
         }
 
-        from backend.app.routers.generation import load_mock_data
+        from app.routers.generation import load_mock_data
 
         with (
             patch("pathlib.Path.exists", return_value=True),
@@ -95,7 +95,7 @@ class TestUtilityFunctions:
 
     def test_create_html5_export(self):
         """Test HTML5 export creation"""
-        from backend.app.routers.export import create_html5_export
+        from app.routers.export import create_html5_export
 
         scene_data = {
             "id": "scene_001",
@@ -155,7 +155,7 @@ class TestErrorHandling:
         """Test file size validation"""
         from fastapi import HTTPException
 
-        from backend.app.config import Settings
+        from app.config import Settings
 
         settings = Settings()
         file_size = 150 * 1024 * 1024  # 150MB
@@ -175,7 +175,7 @@ class TestDatabaseModels:
 
     def test_asset_model_fields(self):
         """Test that Asset model has required fields"""
-        from backend.app.models import Asset
+        from app.models import Asset
 
         # Check that the model has the expected columns
         columns = [c.name for c in Asset.__table__.columns]
@@ -193,7 +193,7 @@ class TestDatabaseModels:
 
     def test_generation_log_model_fields(self):
         """Test that GenerationLog model has required fields"""
-        from backend.app.models import GenerationLog
+        from app.models import GenerationLog
 
         columns = [c.name for c in GenerationLog.__table__.columns]
 

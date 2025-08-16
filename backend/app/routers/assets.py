@@ -51,7 +51,7 @@ async def upload_asset(
     background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
     user_consent: bool = Form(...),
-    _tags: list[str] | None = Form(None),
+    tags: list[str] | None = Form(None),
     db: Session = Depends(get_db),
 ):
     """Upload a new asset with consent validation and EXIF stripping"""

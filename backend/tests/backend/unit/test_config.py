@@ -9,7 +9,7 @@ from unittest.mock import patch
 # Add backend to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "..", "backend"))
 
-from backend.app.config import Settings
+from app.config import Settings
 
 
 class TestSettings:

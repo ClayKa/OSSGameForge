@@ -11,8 +11,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
-# Add backend directory to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "backend"))
+# Add backend app directory to path
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from app.config import Settings
 from app.database import Base, get_db
