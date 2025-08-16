@@ -11,34 +11,32 @@ Key Features:
 - Comprehensive error handling and status tracking
 - Performance monitoring with latency tracking
 """
-import os
 import json
-import time
-import random
-import hashlib
 import logging
-import asyncio
-from typing import Dict, Any, Optional, List, Tuple
-from pathlib import Path
+import os
+import random
+import time
 from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
 
 class InferenceClient:
     """Service for handling AI model inference with fallback mechanism"""
-    
+
     def __init__(self):
         self.use_local_model = os.getenv("USE_LOCAL_MODEL", "false").lower() == "true"
         self.model_endpoint = os.getenv("MODEL_ENDPOINT", "http://localhost:11434")
         self.model_timeout = int(os.getenv("MODEL_TIMEOUT", "45"))
         self.model_name = os.getenv("MODEL_NAME", "gpt-oss-20b")
-        
+
         # Fix path for golden samples
         self.golden_samples_path = Path(__file__).parent.parent / "golden_samples"
         self.golden_samples = []
         self._load_golden_samples()
-        
+
         # Track statistics
         self.stats = {
             "total_requests": 0,
@@ -47,11 +45,11 @@ class InferenceClient:
             "fallback_uses": 0,
             "last_request_time": None
         }
-    
+
     def _load_golden_samples(self):
         """Load golden samples for fallback mode"""
         self.golden_samples = []
-        
+
         # Define keywords for intelligent sample selection
         sample_metadata = {
             "sample_simple_geometry.json": {
@@ -80,16 +78,16 @@ class InferenceClient:
                 "description": "Minimal viable scene with a single entity"
             }
         }
-        
+
         # Try to load from files
         if self.golden_samples_path.exists():
             logger.info(f"Loading golden samples from {self.golden_samples_path}")
-            
+
             for sample_file in self.golden_samples_path.glob("sample_*.json"):
                 try:
-                    with open(sample_file, 'r') as f:
+                    with open(sample_file) as f:
                         sample_data = json.load(f)
-                        
+
                         # Add metadata for intelligent selection
                         file_name = sample_file.name
                         if file_name in sample_metadata:
@@ -110,44 +108,44 @@ class InferenceClient:
                                 "description": "Custom golden sample",
                                 "data": sample_data
                             }
-                        
+
                         self.golden_samples.append(sample_entry)
                         logger.info(f"Loaded golden sample: {file_name}")
-                        
+
                 except Exception as e:
                     logger.error(f"Failed to load golden sample {sample_file}: {e}")
         else:
             logger.warning(f"Golden samples directory not found: {self.golden_samples_path}")
-        
+
         # Log summary
         if self.golden_samples:
             logger.info(f"Successfully loaded {len(self.golden_samples)} golden samples")
         else:
             logger.error("No golden samples loaded - using minimal fallback")
-    
+
     async def generate_scene(
         self,
-        context: Dict[str, Any],
-        model_version: Optional[str] = None
-    ) -> Dict[str, Any]:
+        context: dict[str, Any],
+        model_version: str | None = None
+    ) -> dict[str, Any]:
         """
         Generate a scene based on the provided context
-        
+
         Args:
             context: The generation context from ContextBuilder
             model_version: Optional specific model version to use
-            
+
         Returns:
             Generated scene data with metadata including status tracking
         """
         start_time = time.time()
         self.stats["total_requests"] += 1
         self.stats["last_request_time"] = datetime.now(timezone.utc).isoformat()
-        
+
         status = "success"
         fallback_reason = None
         selected_sample = None
-        
+
         try:
             if self.use_local_model:
                 logger.info(f"Attempting local model generation with {self.model_name}")
@@ -167,9 +165,9 @@ class InferenceClient:
                 result, selected_sample = self._use_fallback_sample(context)
                 self.stats["fallback_uses"] += 1
                 status = "cached_fallback"
-            
+
             latency_ms = int((time.time() - start_time) * 1000)
-            
+
             metadata = {
                 "model_version": model_version or self.model_name if self.use_local_model else "fallback",
                 "latency_ms": latency_ms,
@@ -178,23 +176,23 @@ class InferenceClient:
                 "status": status,
                 "timestamp": datetime.now(timezone.utc).isoformat()
             }
-            
+
             if selected_sample:
                 metadata["fallback_sample"] = selected_sample
-                
+
             if fallback_reason:
                 metadata["fallback_reason"] = fallback_reason
-            
+
             return {
                 "scene": result,
                 "metadata": metadata
             }
-            
+
         except Exception as e:
             logger.error(f"Critical error in scene generation: {e}")
             latency_ms = int((time.time() - start_time) * 1000)
             self.stats["model_failures"] += 1
-            
+
             # On error, return a minimal valid scene
             return {
                 "scene": self._get_error_fallback_scene(),
@@ -207,24 +205,24 @@ class InferenceClient:
                     "timestamp": datetime.now(timezone.utc).isoformat()
                 }
             }
-    
+
     async def _call_local_model(
         self,
-        context: Dict[str, Any],
-        model_version: Optional[str] = None
-    ) -> Dict[str, Any]:
+        context: dict[str, Any],
+        model_version: str | None = None
+    ) -> dict[str, Any]:
         """
         Call the local model endpoint (Ollama or similar)
-        
+
         This attempts to connect to a local model server.
         In production, this would make an HTTP request to the model server.
         For now, it simulates the connection attempt and falls back gracefully.
         """
         import httpx
-        
+
         # Prepare the prompt for the model
         prompt = context.get("engineered_prompt", context.get("user_prompt", ""))
-        
+
         # Construct the request payload
         payload = {
             "model": model_version or self.model_name,
@@ -240,7 +238,7 @@ Return only valid JSON without any explanation.""",
                 "max_tokens": 2048
             }
         }
-        
+
         try:
             # Attempt to call the local model
             async with httpx.AsyncClient(timeout=self.model_timeout) as client:
@@ -249,34 +247,34 @@ Return only valid JSON without any explanation.""",
                     json=payload
                 )
                 response.raise_for_status()
-                
+
                 # Parse the response
                 result = response.json()
                 scene_json = json.loads(result.get("response", "{}"))
-                
+
                 logger.info("Successfully generated scene from local model")
                 return scene_json
-                
-        except httpx.ConnectError:
-            raise ConnectionError(f"Cannot connect to model at {self.model_endpoint}")
-        except httpx.TimeoutException:
-            raise TimeoutError(f"Model request timed out after {self.model_timeout}s")
+
+        except httpx.ConnectError as e:
+            raise ConnectionError(f"Cannot connect to model at {self.model_endpoint}") from e
+        except httpx.TimeoutException as e:
+            raise TimeoutError(f"Model request timed out after {self.model_timeout}s") from e
         except Exception as e:
-            raise RuntimeError(f"Model inference failed: {e}")
-    
-    def _use_fallback_sample(self, context: Dict[str, Any]) -> Tuple[Dict[str, Any], str]:
+            raise RuntimeError(f"Model inference failed: {e}") from e
+
+    def _use_fallback_sample(self, context: dict[str, Any]) -> tuple[dict[str, Any], str]:
         """
         Select and return an appropriate golden sample based on context
-        
+
         Returns:
             Tuple of (scene_data, sample_name)
         """
         if not self.golden_samples:
             logger.warning("No golden samples available, using error fallback")
             return self._get_error_fallback_scene(), "error_fallback"
-        
+
         user_prompt = context.get("engineered_prompt", context.get("user_prompt", "")).lower()
-        
+
         # Score each sample based on keyword matching
         scores = []
         for sample in self.golden_samples:
@@ -286,18 +284,18 @@ Return only valid JSON without any explanation.""",
                     score += 2  # Exact keyword match
                 elif any(word in user_prompt for word in keyword.split()):
                     score += 1  # Partial match
-            
+
             # Add complexity preference based on prompt
             if "simple" in user_prompt or "basic" in user_prompt:
                 score += (4 - sample["complexity"])  # Prefer simpler samples
             elif "complex" in user_prompt or "advanced" in user_prompt:
                 score += sample["complexity"]  # Prefer complex samples
-            
+
             scores.append((score, sample))
-        
+
         # Sort by score and get the best match
         scores.sort(key=lambda x: x[0], reverse=True)
-        
+
         if scores[0][0] > 0:
             # We have a match based on keywords
             selected = scores[0][1]
@@ -311,10 +309,10 @@ Return only valid JSON without any explanation.""",
             else:
                 selected = random.choice(self.golden_samples)
             logger.info(f"Selected golden sample '{selected['name']}' (no keyword match)")
-        
+
         return selected["data"], selected["name"]
-    
-    def _get_error_fallback_scene(self) -> Dict[str, Any]:
+
+    def _get_error_fallback_scene(self) -> dict[str, Any]:
         """Return a minimal valid scene for error cases"""
         return {
             "id": f"scene_error_{int(time.time())}",
@@ -352,8 +350,8 @@ Return only valid JSON without any explanation.""",
                 }
             ]
         }
-    
-    def get_model_status(self) -> Dict[str, Any]:
+
+    def get_model_status(self) -> dict[str, Any]:
         """Get current model status and configuration"""
         status = {
             "use_local_model": self.use_local_model,
@@ -372,7 +370,7 @@ Return only valid JSON without any explanation.""",
             "status": "ready" if self.golden_samples else "degraded",
             "statistics": self.stats
         }
-        
+
         # Check model connectivity if local model is enabled
         if self.use_local_model:
             try:
@@ -384,18 +382,18 @@ Return only valid JSON without any explanation.""",
                         status["model_connectivity"] = "connected"
                     else:
                         status["model_connectivity"] = "unreachable"
-            except:
+            except Exception:
                 status["model_connectivity"] = "disconnected"
-        
+
         return status
-    
-    def load_golden_sample(self, sample_name: str) -> Optional[Dict[str, Any]]:
+
+    def load_golden_sample(self, sample_name: str) -> dict[str, Any] | None:
         """
         Load a specific golden sample by name
-        
+
         Args:
             sample_name: Name of the sample to load
-            
+
         Returns:
             The sample data or None if not found
         """
@@ -403,11 +401,11 @@ Return only valid JSON without any explanation.""",
             if sample["name"] == sample_name:
                 return sample["data"]
         return None
-    
-    def list_golden_samples(self) -> List[Dict[str, Any]]:
+
+    def list_golden_samples(self) -> list[dict[str, Any]]:
         """
         List all available golden samples
-        
+
         Returns:
             List of sample metadata
         """

@@ -1,11 +1,12 @@
 """
 Database configuration and session management
 """
+import logging
+from collections.abc import Generator
+
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, Session
-from typing import Generator
-import logging
+from sqlalchemy.orm import Session, sessionmaker
 
 from .config import settings
 
@@ -48,8 +49,7 @@ def init_db():
     """
     try:
         # Import all models to ensure they are registered
-        from . import models  # This imports all models from models/__init__.py
-        
+        from . import models  # This imports all models from models/__init__.py  # noqa: F401
         # Create all tables
         Base.metadata.create_all(bind=engine)
         logger.info("Database tables created successfully")

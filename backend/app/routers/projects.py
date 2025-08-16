@@ -1,12 +1,12 @@
 """
 Projects router for OSSGameForge API
 """
-from fastapi import APIRouter, HTTPException, status
-from typing import List
 import json
+from datetime import datetime
 from pathlib import Path
 from uuid import uuid4
-from datetime import datetime
+
+from fastapi import APIRouter, HTTPException, status
 
 from ..config import settings
 from ..schemas.project import ProjectCreate, ProjectResponse
@@ -19,19 +19,19 @@ def load_mock_data():
     if not mock_file.exists():
         # Fallback to devops/mocks directory
         mock_file = Path("/app/../devops/mocks/mock_data.json")
-    
+
     if mock_file.exists():
-        with open(mock_file, 'r') as f:
+        with open(mock_file) as f:
             return json.load(f)
     return {"projects": [], "assets": [], "scenes": []}
 
-@router.get("/", response_model=List[ProjectResponse])
+@router.get("/", response_model=list[ProjectResponse])
 async def list_projects():
     """List all projects"""
     if settings.mock_mode:
         data = load_mock_data()
         return data.get("projects", [])
-    
+
     # TODO: Implement real database query
     return []
 
@@ -51,7 +51,7 @@ async def create_project(project: ProjectCreate):
             "scenes_count": 0
         }
         return new_project
-    
+
     # TODO: Implement real project creation
     raise HTTPException(status_code=501, detail="Real mode not implemented yet")
 
@@ -65,6 +65,6 @@ async def get_project(project_id: str):
             if project["id"] == project_id:
                 return project
         raise HTTPException(status_code=404, detail="Project not found")
-    
+
     # TODO: Implement real database query
     raise HTTPException(status_code=501, detail="Real mode not implemented yet")

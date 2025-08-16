@@ -1,13 +1,14 @@
 """
 Project schemas for OSSGameForge API
 """
+
 from pydantic import BaseModel, Field
-from typing import Optional
+
 
 class ProjectBase(BaseModel):
     """Base project schema"""
     name: str = Field(..., min_length=1, max_length=100)
-    description: Optional[str] = Field(None, max_length=500)
+    description: str | None = Field(None, max_length=500)
 
 class ProjectCreate(ProjectBase):
     """Schema for creating a project"""
@@ -15,7 +16,7 @@ class ProjectCreate(ProjectBase):
 
 class ProjectUpdate(ProjectBase):
     """Schema for updating a project"""
-    name: Optional[str] = Field(None, min_length=1, max_length=100)
+    name: str | None = Field(None, min_length=1, max_length=100)
 
 class ProjectResponse(ProjectBase):
     """Schema for project response"""
@@ -25,7 +26,7 @@ class ProjectResponse(ProjectBase):
     updated_at: str
     assets_count: int = 0
     scenes_count: int = 0
-    
+
     class Config:
         from_attributes = True
 

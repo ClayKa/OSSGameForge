@@ -1,13 +1,22 @@
 """
 Assets router for OSSGameForge API
 """
-from fastapi import APIRouter, HTTPException, status, File, UploadFile, Form, Depends, BackgroundTasks
-from sqlalchemy.orm import Session
-from typing import List, Optional
 import json
+import logging
 from pathlib import Path
 from uuid import uuid4
-import logging
+
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    Depends,
+    File,
+    Form,
+    HTTPException,
+    UploadFile,
+    status,
+)
+from sqlalchemy.orm import Session
 
 from ..config import settings
 from ..database import get_db
@@ -23,9 +32,9 @@ def load_mock_data():
     if not mock_file.exists():
         # Fallback to devops/mocks directory
         mock_file = Path("/app/../devops/mocks/mock_data.json")
-    
+
     if mock_file.exists():
-        with open(mock_file, 'r') as f:
+        with open(mock_file) as f:
             return json.load(f)
     return {"projects": [], "assets": [], "scenes": []}
 
@@ -35,29 +44,29 @@ async def upload_asset(
     background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
     user_consent: bool = Form(...),
-    tags: Optional[List[str]] = Form(None),
+    _tags: list[str] | None = Form(None),
     db: Session = Depends(get_db)
 ):
     """Upload a new asset with consent validation and EXIF stripping"""
-    
+
     # Validate user consent - CRITICAL SECURITY CHECK
     if not user_consent:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="User consent is mandatory and must be explicitly set to 'true'."
         )
-    
+
     # Read file content
     file_content = await file.read()
     file_size = len(file_content)
-    
+
     # Validate file size
     if file_size > settings.max_upload_size:
         raise HTTPException(
             status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
             detail=f"File size exceeds maximum allowed size of {settings.max_upload_size} bytes"
         )
-    
+
     # Validate file type
     content_type = file.content_type or "application/octet-stream"
     if content_type.startswith("image/") and content_type not in settings.allowed_image_types:
@@ -75,7 +84,7 @@ async def upload_asset(
             status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
             detail=f"Video type {content_type} is not supported"
         )
-    
+
     if settings.mock_mode:
         # Create mock response
         asset_id = str(uuid4())
@@ -85,7 +94,7 @@ async def upload_asset(
             "status": "processing",
             "message": "Asset upload initiated (mock mode)"
         }
-    
+
     try:
         # Create initial database record
         new_asset = asset_service.create_initial_asset_record(
@@ -95,37 +104,37 @@ async def upload_asset(
             content_type=content_type,
             file_size=file_size
         )
-        
+
         # Process and store the file (includes EXIF stripping for images)
-        storage_path = await asset_service.process_and_store_file(
+        await asset_service.process_and_store_file(
             db=db,
             asset=new_asset,
             file_data=file_content,
             original_filename=file.filename
         )
-        
+
         # Add background task for metadata extraction
         background_tasks.add_task(
             asset_service.extract_metadata_task,
             asset_id=str(new_asset.id)
         )
-        
+
         logger.info(f"Asset {new_asset.id} uploaded successfully, processing in background")
-        
+
         return {
             "asset_id": str(new_asset.id),
             "status": "processing",
             "message": "Asset upload initiated successfully"
         }
-        
+
     except Exception as e:
         logger.error(f"Failed to upload asset: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to process asset upload: {str(e)}"
-        )
+        ) from e
 
-@router.get("/projects/{project_id}/assets", response_model=List[AssetResponse])
+@router.get("/projects/{project_id}/assets", response_model=list[AssetResponse])
 async def list_project_assets(
     project_id: str,
     db: Session = Depends(get_db)
@@ -137,7 +146,7 @@ async def list_project_assets(
         # Filter assets by project_id
         project_assets = [asset for asset in assets if asset.get("project_id") == project_id]
         return project_assets
-    
+
     # Real implementation
     assets = asset_service.list_project_assets(db, project_id)
     return [
@@ -169,12 +178,12 @@ async def get_asset(
             if asset["id"] == asset_id:
                 return asset
         raise HTTPException(status_code=404, detail="Asset not found")
-    
+
     # Real implementation
     asset = asset_service.get_asset_by_id(db, asset_id)
     if not asset:
         raise HTTPException(status_code=404, detail="Asset not found")
-    
+
     return {
         "id": str(asset.id),
         "project_id": asset.project_id,

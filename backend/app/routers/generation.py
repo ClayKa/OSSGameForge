@@ -8,19 +8,17 @@ This module orchestrates the entire generation pipeline:
 3. Post-processing and validation
 4. Audit logging for all requests
 """
-from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks, status
-from sqlalchemy.orm import Session
-import json
 import hashlib
-import time
 import logging
-from typing import Optional, List, Dict, Any
+import time
+from typing import Any
 from uuid import uuid4
-from datetime import datetime, timezone
+
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
+from sqlalchemy.orm import Session
 
 from ..database import get_db
-from ..config import settings
-from ..models.core_models import GenerationLog, Asset, Scene
+from ..models.core_models import Asset, GenerationLog, Scene
 from ..schemas.generation import GenerationRequest, GenerationResponse
 from ..services.context_builder import context_builder
 from ..services.inference_client import inference_client
@@ -38,13 +36,13 @@ async def log_generation(
     model_version: str,
     status: str,
     latency_ms: int,
-    request_payload: Dict[str, Any],
-    response_payload: Optional[Dict[str, Any]] = None,
-    error: Optional[str] = None
+    request_payload: dict[str, Any],
+    response_payload: dict[str, Any] | None = None,
+    error: str | None = None
 ) -> None:
     """
     Log generation request to database for audit and performance tracking
-    
+
     Args:
         db: Database session
         user_id: User identifier
@@ -80,12 +78,12 @@ async def log_generation(
 async def save_scene_to_db(
     db: Session,
     project_id: str,
-    scene_data: Dict[str, Any],
-    generation_log_id: Optional[str] = None
+    scene_data: dict[str, Any],
+    generation_log_id: str | None = None
 ) -> None:
     """
     Save generated scene to database
-    
+
     Args:
         db: Database session
         project_id: Project identifier
@@ -116,7 +114,7 @@ async def generate_scene(
 ):
     """
     Generate a game scene from prompt with comprehensive logging
-    
+
     This endpoint:
     1. Builds context from the user prompt and assets
     2. Calls the inference service (with automatic fallback)
@@ -125,20 +123,20 @@ async def generate_scene(
     5. Returns the generated scene
     """
     start_time = time.time()
-    
+
     # Extract user ID (simplified for MVP - would come from auth in production)
     user_id = request.user_id or "anonymous"
-    
+
     # Create input hash for deduplication
     input_data = f"{request.prompt}_{request.project_id}_{request.style or 'default'}"
     if request.assets:
         input_data += f"_{'_'.join(request.assets)}"
     input_hash = hashlib.sha256(input_data.encode()).hexdigest()[:16]
-    
+
     try:
         # Step 1: Build context using ContextBuilder
         logger.info(f"Building context for project {request.project_id}")
-        
+
         # Fetch assets from database if provided
         assets_data = []
         if request.assets:
@@ -147,7 +145,7 @@ async def generate_scene(
                 Asset.project_id == request.project_id
             ).all()
             assets_data = [asset.to_dict() for asset in assets]
-        
+
         context = context_builder.build_generation_prompt(
             user_prompt=request.prompt,
             project_id=request.project_id,
@@ -155,14 +153,14 @@ async def generate_scene(
             assets=assets_data,
             constraints=request.constraints
         )
-        
+
         # Step 2: Call InferenceClient for generation
         logger.info(f"Generating scene with prompt hash: {context['prompt_hash']}")
         generation_result = await inference_client.generate_scene(
             context=context,
             model_version=request.model_version
         )
-        
+
         # Step 3: Post-process the generated scene
         logger.info("Post-processing generated scene")
         processed_scene = postprocessor.process_scene(
@@ -170,17 +168,17 @@ async def generate_scene(
             project_id=request.project_id,
             assets=assets_data
         )
-        
+
         # Validate the processed scene
         if not postprocessor.validate_scene(processed_scene):
             raise ValueError("Generated scene failed validation")
-        
+
         # Enhance the scene with additional features
         enhanced_scene = postprocessor.enhance_scene(processed_scene)
-        
+
         # Calculate total latency
         latency_ms = int((time.time() - start_time) * 1000)
-        
+
         # Step 4: Log to database (in background)
         generation_log_id = str(uuid4())
         background_tasks.add_task(
@@ -195,7 +193,7 @@ async def generate_scene(
             request_payload=request.dict(),
             response_payload=enhanced_scene
         )
-        
+
         # Save scene to database (in background)
         background_tasks.add_task(
             save_scene_to_db,
@@ -204,7 +202,7 @@ async def generate_scene(
             scene_data=enhanced_scene,
             generation_log_id=generation_log_id
         )
-        
+
         # Step 5: Return response
         logger.info(f"Generation successful - Status: {generation_result['metadata']['status']}")
         return GenerationResponse(
@@ -219,11 +217,11 @@ async def generate_scene(
                 "prompt_hash": context["prompt_hash"]
             }
         )
-        
+
     except Exception as e:
         logger.error(f"Generation failed: {e}")
         latency_ms = int((time.time() - start_time) * 1000)
-        
+
         # Log the error
         background_tasks.add_task(
             log_generation,
@@ -237,18 +235,18 @@ async def generate_scene(
             request_payload=request.dict(),
             error=str(e)
         )
-        
+
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Generation failed: {str(e)}"
-        )
+        ) from e
 
 
 @router.get("/status")
 async def get_generation_status():
     """
     Get the current status of the generation service
-    
+
     Returns information about:
     - Model connectivity
     - Available golden samples
@@ -261,7 +259,7 @@ async def get_generation_status():
 async def list_golden_samples():
     """
     List all available golden samples
-    
+
     Useful for testing and debugging
     """
     return {
@@ -274,7 +272,7 @@ async def list_golden_samples():
 async def get_golden_sample(sample_name: str):
     """
     Get a specific golden sample by name
-    
+
     Args:
         sample_name: Name of the sample to retrieve
     """

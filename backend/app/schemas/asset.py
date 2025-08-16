@@ -1,9 +1,11 @@
 """
 Asset schemas for OSSGameForge API
 """
-from pydantic import BaseModel
-from typing import Optional, Dict, Any
 from enum import Enum
+from typing import Any
+
+from pydantic import BaseModel
+
 
 class AssetType(str, Enum):
     """Asset type enumeration"""
@@ -37,11 +39,11 @@ class AssetResponse(BaseModel):
     path: str
     type: AssetType
     status: AssetStatus
-    metadata: Optional[Dict[str, Any]] = {}
+    metadata: dict[str, Any] | None = {}
     consent_hash: str
     exif_stripped: bool
     created_at: str
-    
+
     class Config:
         from_attributes = True
 

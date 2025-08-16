@@ -10,19 +10,17 @@ Handles asset processing including:
 import hashlib
 import io
 import logging
-import os
 import tempfile
 import time
-import uuid
 from pathlib import Path
-from typing import Dict, Any, Optional
-from PIL import Image, ImageOps
-from sqlalchemy.orm import Session
+
 import tinytag
+from PIL import Image
+from sqlalchemy.orm import Session
 
 from ..database import SessionLocal
 from ..models import Asset
-from ..storage import minio_client, upload_file_to_storage, download_file_from_storage
+from ..storage import download_file_from_storage, minio_client, upload_file_to_storage
 
 logger = logging.getLogger(__name__)
 
@@ -36,14 +34,14 @@ def create_initial_asset_record(
 ) -> Asset:
     """
     Create initial asset record in database
-    
+
     Args:
         db: Database session
         project_id: Project identifier
         filename: Original filename
         content_type: MIME type of the file
         file_size: Size of the file in bytes
-        
+
     Returns:
         Created Asset model instance
     """
@@ -52,10 +50,10 @@ def create_initial_asset_record(
     consent_hash = hashlib.sha256(
         f"{user_id}{filename}{time.time()}".encode()
     ).hexdigest()
-    
+
     # Determine asset type from content type
     asset_type = _determine_asset_type(content_type)
-    
+
     # Create new asset record
     new_asset = Asset(
         project_id=project_id,
@@ -70,11 +68,11 @@ def create_initial_asset_record(
             "file_size": file_size
         }
     )
-    
+
     db.add(new_asset)
     db.commit()
     db.refresh(new_asset)
-    
+
     logger.info(f"Created asset record: {new_asset.id}")
     return new_asset
 
@@ -101,20 +99,20 @@ async def process_and_store_file(
 ) -> str:
     """
     Process and store uploaded file
-    
+
     Args:
         db: Database session
         asset: Asset model instance
         file_data: Raw file data
         original_filename: Original filename
-        
+
     Returns:
         Storage path in MinIO
     """
     # Generate storage path
     file_extension = Path(original_filename).suffix
     storage_path = f"projects/{asset.project_id}/assets/{asset.id}{file_extension}"
-    
+
     try:
         # Process based on file type
         if asset.type == "image":
@@ -122,11 +120,11 @@ async def process_and_store_file(
             asset.exif_stripped = True
         else:
             processed_data = file_data
-        
+
         # Upload to MinIO
         bucket_name = "ossgameforge-assets"
         _ensure_bucket_exists(bucket_name)
-        
+
         upload_file_to_storage(
             bucket_name=bucket_name,
             object_name=storage_path,
@@ -134,15 +132,15 @@ async def process_and_store_file(
             length=len(processed_data),
             content_type=asset.asset_metadata.get("content_type", "application/octet-stream")
         )
-        
+
         # Update asset record
         asset.path = storage_path
         asset.status = "uploaded"
         db.commit()
-        
+
         logger.info(f"Stored asset {asset.id} at {storage_path}")
         return storage_path
-        
+
     except Exception as e:
         logger.error(f"Failed to process and store asset {asset.id}: {e}")
         asset.status = "error"
@@ -154,18 +152,18 @@ async def process_and_store_file(
 async def _process_image(file_data: bytes, asset: Asset) -> bytes:
     """
     Process image file to strip EXIF data
-    
+
     Args:
         file_data: Raw image data
         asset: Asset model instance
-        
+
     Returns:
         Processed image data without EXIF
     """
     try:
         # Open image from bytes
         image = Image.open(io.BytesIO(file_data))
-        
+
         # Store basic metadata before stripping
         asset.asset_metadata.update({
             "width": image.width,
@@ -173,7 +171,7 @@ async def _process_image(file_data: bytes, asset: Asset) -> bytes:
             "format": image.format,
             "mode": image.mode
         })
-        
+
         # Strip EXIF data by creating new image
         # This removes all metadata including EXIF, IPTC, and XMP
         if image.mode in ("RGBA", "LA", "P"):
@@ -186,7 +184,7 @@ async def _process_image(file_data: bytes, asset: Asset) -> bytes:
                 image = image.convert("RGB")
             clean_image = Image.new("RGB", image.size)
             clean_image.putdata(list(image.getdata()))
-        
+
         # Save to bytes
         output = io.BytesIO()
         save_format = asset.asset_metadata.get("format", "JPEG")
@@ -194,9 +192,9 @@ async def _process_image(file_data: bytes, asset: Asset) -> bytes:
             clean_image.save(output, format=save_format, quality=95, optimize=True)
         else:
             clean_image.save(output, format=save_format)
-        
+
         return output.getvalue()
-        
+
     except Exception as e:
         logger.error(f"Failed to process image: {e}")
         raise
@@ -215,7 +213,7 @@ def _ensure_bucket_exists(bucket_name: str):
 def extract_metadata_task(asset_id: str):
     """
     Background task to extract metadata from asset
-    
+
     Args:
         asset_id: UUID of the asset to process
     """
@@ -227,16 +225,16 @@ def extract_metadata_task(asset_id: str):
         if not asset:
             logger.error(f"Asset {asset_id} not found")
             return
-        
+
         # Skip if already processed or errored
         if asset.status in ["processed", "error"]:
             return
-        
+
         logger.info(f"Extracting metadata for asset {asset_id}")
-        
+
         # Download file from storage for processing
         bucket_name = "ossgameforge-assets"
-        
+
         with tempfile.NamedTemporaryFile(delete=True) as temp_file:
             try:
                 # Download to temp file
@@ -246,7 +244,7 @@ def extract_metadata_task(asset_id: str):
                 )
                 temp_file.write(file_data)
                 temp_file.flush()
-                
+
                 # Extract metadata based on type
                 if asset.type == "audio":
                     _extract_audio_metadata(asset, temp_file.name, db)
@@ -255,19 +253,19 @@ def extract_metadata_task(asset_id: str):
                 elif asset.type == "image":
                     # Image metadata already extracted during upload
                     pass
-                
+
                 # Update status
                 if asset.status != "error":
                     asset.status = "processed"
                     db.commit()
                     logger.info(f"Successfully processed asset {asset_id}")
-                    
+
             except Exception as e:
                 logger.error(f"Failed to extract metadata for asset {asset_id}: {e}")
                 asset.status = "error"
                 asset.asset_metadata["error"] = str(e)
                 db.commit()
-                
+
     finally:
         db.close()
 
@@ -276,7 +274,7 @@ def _extract_audio_metadata(asset: Asset, file_path: str, db: Session):
     """Extract metadata from audio file"""
     try:
         tag = tinytag.TinyTag.get(file_path)
-        
+
         # Extract essential metadata
         metadata = {
             "duration_seconds": tag.duration,
@@ -284,7 +282,7 @@ def _extract_audio_metadata(asset: Asset, file_path: str, db: Session):
             "samplerate": tag.samplerate,
             "channels": tag.channels,
         }
-        
+
         # Add optional metadata if available
         if tag.artist:
             metadata["artist"] = tag.artist
@@ -292,13 +290,13 @@ def _extract_audio_metadata(asset: Asset, file_path: str, db: Session):
             metadata["title"] = tag.title
         if tag.album:
             metadata["album"] = tag.album
-        
+
         # Update asset metadata
         asset.asset_metadata.update(metadata)
         db.commit()
-        
+
         logger.info(f"Extracted audio metadata for asset {asset.id}")
-        
+
     except Exception as e:
         logger.error(f"Failed to extract audio metadata: {e}")
         raise
@@ -310,31 +308,31 @@ def _extract_video_metadata(asset: Asset, file_path: str, db: Session):
         # For MVP, we'll use tinytag for basic video metadata
         # In production, you might want to use ffprobe or similar
         tag = tinytag.TinyTag.get(file_path)
-        
+
         metadata = {
             "duration_seconds": tag.duration,
             "bitrate": tag.bitrate,
         }
-        
+
         # Update asset metadata
         asset.asset_metadata.update(metadata)
         db.commit()
-        
+
         logger.info(f"Extracted video metadata for asset {asset.id}")
-        
+
     except Exception as e:
         logger.error(f"Failed to extract video metadata: {e}")
         raise
 
 
-def get_asset_by_id(db: Session, asset_id: str) -> Optional[Asset]:
+def get_asset_by_id(db: Session, asset_id: str) -> Asset | None:
     """
     Retrieve asset by ID
-    
+
     Args:
         db: Database session
         asset_id: Asset UUID
-        
+
     Returns:
         Asset instance or None
     """
@@ -344,21 +342,21 @@ def get_asset_by_id(db: Session, asset_id: str) -> Optional[Asset]:
 def list_project_assets(db: Session, project_id: str) -> list:
     """
     List all assets for a project
-    
+
     Args:
         db: Database session
         project_id: Project identifier
-        
+
     Returns:
         List of assets
     """
     return db.query(Asset).filter(Asset.project_id == project_id).all()
 
 
-def update_asset_status(db: Session, asset_id: str, status: str, metadata: Optional[Dict] = None):
+def update_asset_status(db: Session, asset_id: str, status: str, metadata: dict | None = None):
     """
     Update asset status and optionally metadata
-    
+
     Args:
         db: Database session
         asset_id: Asset UUID

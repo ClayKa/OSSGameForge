@@ -4,19 +4,21 @@ Alembic environment configuration
 This file is executed whenever alembic commands are run.
 It configures the database connection and migration behavior.
 """
-from logging.config import fileConfig
 import os
 import sys
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
+from logging.config import fileConfig
+
 from alembic import context
+from sqlalchemy import engine_from_config, pool
 
 # Add parent directory to path to import app modules
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 
 # Import the Base and models
 from app.database import Base
-from app.models import Asset, GenerationLog, Project, Scene
+
+# Import models for metadata registration
+from app.models import Asset, GenerationLog, Project, Scene  # noqa: F401
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -42,7 +44,6 @@ def get_database_url():
     url = os.getenv("DATABASE_URL")
     if url:
         return url
-    
     # Fall back to config file
     return config.get_main_option("sqlalchemy.url")
 
@@ -79,7 +80,6 @@ def run_migrations_online() -> None:
     # Override the sqlalchemy.url with environment variable if available
     configuration = config.get_section(config.config_ini_section)
     configuration["sqlalchemy.url"] = get_database_url()
-    
     connectable = engine_from_config(
         configuration,
         prefix="sqlalchemy.",
@@ -88,7 +88,7 @@ def run_migrations_online() -> None:
 
     with connectable.connect() as connection:
         context.configure(
-            connection=connection, 
+            connection=connection,
             target_metadata=target_metadata
         )
 

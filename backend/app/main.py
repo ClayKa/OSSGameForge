@@ -2,14 +2,15 @@
 OSSGameForge Backend API
 Main FastAPI application entry point
 """
+import logging
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from contextlib import asynccontextmanager
-import logging
 
 from .config import settings
 from .database import init_db
-from .routers import projects, assets, generation, export, health
+from .routers import assets, export, generation, health, projects
 
 # Configure logging
 logging.basicConfig(
@@ -19,7 +20,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(_: FastAPI):
     """
     Manage application lifecycle
     """
@@ -27,7 +28,6 @@ async def lifespan(app: FastAPI):
     logger.info("Starting OSSGameForge Backend...")
     logger.info(f"Mock Mode: {settings.mock_mode}")
     logger.info(f"Local Model: {settings.use_local_model}")
-    
     # Initialize database tables if not in mock mode
     if not settings.mock_mode:
         try:
@@ -38,7 +38,6 @@ async def lifespan(app: FastAPI):
             # Continue anyway in development, but in production this should fail
             if not settings.debug:
                 raise
-    
     yield
     # Shutdown
     logger.info("Shutting down OSSGameForge Backend...")

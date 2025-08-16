@@ -1,16 +1,17 @@
 """
 Export router for OSSGameForge API
 """
+import io
+import json
+import zipfile
+from datetime import datetime
+from pathlib import Path
+
 from fastapi import APIRouter, HTTPException, Query, status
 from fastapi.responses import StreamingResponse
-import json
-from pathlib import Path
-from datetime import datetime
-import zipfile
-import io
 
 from ..config import settings
-from ..schemas.export import ExportRequest, ExportEngine
+from ..schemas.export import ExportEngine, ExportRequest
 
 router = APIRouter()
 
@@ -20,15 +21,15 @@ def load_mock_data():
     if not mock_file.exists():
         # Fallback to devops/mocks directory
         mock_file = Path("/app/../devops/mocks/mock_data.json")
-    
+
     if mock_file.exists():
-        with open(mock_file, 'r') as f:
+        with open(mock_file) as f:
             return json.load(f)
     return {"projects": [], "assets": [], "scenes": []}
 
 def create_html5_export(scene_data: dict) -> bytes:
     """Create a simple HTML5 export package"""
-    
+
     # Create HTML5 runner template
     html_content = """<!DOCTYPE html>
 <html lang="en">
@@ -71,24 +72,24 @@ def create_html5_export(scene_data: dict) -> bytes:
         const sceneData = {scene_json};
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-        
+
         // Simple render function
         function render() {{
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
+
             // Render entities
             if (sceneData.entities) {{
                 sceneData.entities.forEach(entity => {{
                     if (entity.color) {{
                         ctx.fillStyle = entity.color;
                         ctx.fillRect(
-                            entity.position.x, 
+                            entity.position.x,
                             entity.position.y,
                             entity.size.width,
                             entity.size.height
                         );
                     }}
-                    
+
                     // Draw entity name
                     ctx.fillStyle = 'white';
                     ctx.font = '12px Arial';
@@ -100,16 +101,16 @@ def create_html5_export(scene_data: dict) -> bytes:
                 }});
             }}
         }}
-        
+
         // Initial render
         render();
-        
+
         // Simple game loop
         function gameLoop() {{
             render();
             requestAnimationFrame(gameLoop);
         }}
-        
+
         gameLoop();
     </script>
 </body>
@@ -121,16 +122,16 @@ def create_html5_export(scene_data: dict) -> bytes:
         bg_color=scene_data.get("metadata", {}).get("background_color", "#87CEEB"),
         scene_json=json.dumps(scene_data)
     )
-    
+
     # Create a zip file in memory
     zip_buffer = io.BytesIO()
     with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
         # Add HTML file
         zip_file.writestr("index.html", html_content)
-        
+
         # Add scene data as separate JSON
         zip_file.writestr("scene.json", json.dumps(scene_data, indent=2))
-        
+
         # Add a simple README
         readme_content = f"""# {scene_data.get("name", "OSSGameForge Game")}
 
@@ -150,7 +151,7 @@ def create_html5_export(scene_data: dict) -> bytes:
 Generated with OSSGameForge
 """
         zip_file.writestr("README.md", readme_content)
-    
+
     return zip_buffer.getvalue()
 
 @router.post("/export")
@@ -159,18 +160,18 @@ async def export_scene(
     engine: ExportEngine = Query(default=ExportEngine.HTML5)
 ):
     """Export scene to playable format"""
-    
+
     if settings.mock_mode:
         data = load_mock_data()
         scenes = data.get("scenes", [])
-        
+
         # Find the requested scene
         scene = None
         for s in scenes:
             if s["id"] == request.scene_id:
                 scene = s
                 break
-        
+
         if not scene:
             # Try to find in generated scenes (mock)
             # For now, create a default scene
@@ -196,11 +197,11 @@ async def export_scene(
                 ],
                 "created_at": datetime.utcnow().isoformat() + "Z"
             }
-        
+
         if engine == ExportEngine.HTML5:
             # Create HTML5 export
             zip_content = create_html5_export(scene)
-            
+
             return StreamingResponse(
                 io.BytesIO(zip_content),
                 media_type="application/zip",
@@ -229,6 +230,6 @@ position = Vector2({scene['entities'][0]['position']['x']}, {scene['entities'][0
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Export engine {engine} not yet supported"
             )
-    
+
     # TODO: Implement real export functionality
     raise HTTPException(status_code=501, detail="Real mode not implemented yet")

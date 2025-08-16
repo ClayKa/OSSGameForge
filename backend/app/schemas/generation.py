@@ -1,9 +1,11 @@
 """
 Generation schemas for OSSGameForge API
 """
-from pydantic import BaseModel, Field
-from typing import Optional, List, Dict, Any
 from enum import Enum
+from typing import Any
+
+from pydantic import BaseModel, Field
+
 
 class GameStyle(str, Enum):
     """Game style enumeration"""
@@ -33,10 +35,10 @@ class Size(BaseModel):
 
 class Physics(BaseModel):
     """Physics properties"""
-    gravity: Optional[bool] = False
-    collision: Optional[bool] = True
-    static: Optional[bool] = False
-    mass: Optional[float] = 1.0
+    gravity: bool | None = False
+    collision: bool | None = True
+    static: bool | None = False
+    mass: float | None = 1.0
 
 class Entity(BaseModel):
     """Game entity schema"""
@@ -45,18 +47,18 @@ class Entity(BaseModel):
     name: str
     position: Position
     size: Size
-    sprite: Optional[str] = None
-    color: Optional[str] = None
-    physics: Optional[Physics] = None
-    properties: Optional[Dict[str, Any]] = {}
+    sprite: str | None = None
+    color: str | None = None
+    physics: Physics | None = None
+    properties: dict[str, Any] | None = {}
 
 class SceneMetadata(BaseModel):
     """Scene metadata"""
     width: int = 1920
     height: int = 1080
     background_color: str = "#87CEEB"
-    theme: Optional[str] = None
-    used_assets: Optional[List[str]] = []
+    theme: str | None = None
+    used_assets: list[str] | None = []
 
 class Scene(BaseModel):
     """Game scene schema"""
@@ -66,15 +68,15 @@ class Scene(BaseModel):
     description: str
     version: str = "1.0.0"
     metadata: SceneMetadata
-    entities: List[Entity]
+    entities: list[Entity]
     created_at: str
 
 class GenerationRequest(BaseModel):
     """Request for scene generation"""
     prompt: str = Field(..., min_length=1, max_length=1000)
     project_id: str
-    assets: Optional[List[str]] = []
-    style: Optional[GameStyle] = None
+    assets: list[str] | None = []
+    style: GameStyle | None = None
 
 class GenerationResponse(BaseModel):
     """Response for scene generation"""

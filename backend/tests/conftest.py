@@ -1,25 +1,27 @@
 """
 Pytest configuration and shared fixtures
 """
-import pytest
 import asyncio
-from typing import Generator, AsyncGenerator
-from unittest.mock import MagicMock
-import sys
 import os
+import sys
+from collections.abc import Generator
+from io import BytesIO
+from unittest.mock import MagicMock
+
+import pytest
 
 # Add backend directory to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'backend'))
 
-from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, Session
-from sqlalchemy.pool import StaticPool
+from app.config import Settings
+from app.database import Base, get_db
 
 # Import app dependencies
 from app.main import app
-from app.database import Base, get_db
-from app.config import Settings
+from fastapi.testclient import TestClient
+from sqlalchemy import create_engine
+from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.pool import StaticPool
 
 # Create test settings instance
 settings = Settings()
@@ -67,7 +69,7 @@ def test_client(test_db_session) -> TestClient:
             yield test_db_session
         finally:
             pass
-    
+
     app.dependency_overrides[get_db] = override_get_db
     client = TestClient(app)
     yield client
@@ -86,14 +88,15 @@ def mock_minio_client():
 def sample_image_file():
     """Create a sample image file for testing"""
     from io import BytesIO
+
     from PIL import Image
-    
+
     # Create a simple RGB image
     img = Image.new('RGB', (100, 100), color='red')
     img_bytes = BytesIO()
     img.save(img_bytes, format='PNG')
     img_bytes.seek(0)
-    
+
     return {
         "file": img_bytes,
         "filename": "test_image.png",
@@ -127,16 +130,16 @@ def auth_headers():
 async def async_client(test_db_session):
     """Async test client for async endpoint testing"""
     from httpx import AsyncClient
-    
+
     def override_get_db():
         try:
             yield test_db_session
         finally:
             pass
-    
+
     app.dependency_overrides[get_db] = override_get_db
-    
+
     async with AsyncClient(app=app, base_url="http://test") as client:
         yield client
-    
+
     app.dependency_overrides.clear()
