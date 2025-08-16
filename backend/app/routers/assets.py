@@ -106,7 +106,6 @@ async def upload_asset(
     try:
         # Ensure filename is not None
         filename = file.filename or "unknown_file"
-        
         # Create initial database record
         new_asset = asset_service.create_initial_asset_record(
             db=db,
